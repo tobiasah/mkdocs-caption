@@ -1,0 +1,21 @@
+name: Lint check
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.10
+    - name: Install dependencies
+      run:  pip install -U hatch
+    - name: Run lint
+      run:  hatch run lint:all
