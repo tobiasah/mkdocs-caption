@@ -4,6 +4,8 @@
 # Python
 __pycache__
 dist/
+_version.py
+
 ## MyPy
 .mypy_cache
 ## Pytest

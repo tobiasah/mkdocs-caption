@@ -3,7 +3,7 @@ name = "Tobias Ahrens"
 email = "tobias.ahrens@posteo.de"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -39,7 +39,10 @@ Issues = "https://github.com/tobiasah/mkdocs-caption/issues"
 Source = "https://github.com/tobiasah/mkdocs-caption"
 
 [tool.hatch.version]
-path = "src/mkdocs_caption/__about__.py"
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/mkdocs_caption/_version.py"
 
 [tool.hatch.build.targets.sdist]
 exclude = [
