@@ -15,7 +15,7 @@ requires-python = ">=3.7"
 license = "MIT"
 keywords = []
 authors = [
-  { name = "Tobias Ahrens", email = "tobias.ahrens@zhinst.com" },
+  { name = "Tobias Ahrens", email = "tobias.ahrens@posteo.de" },
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -31,7 +31,7 @@ classifiers = [
 dependencies = ["mkdocs", "lxml"]
 
 [project.entry-points."mkdocs.plugins"]
-mkdocs_caption = "mkdocs_caption:CaptionPlugin"
+caption = "mkdocs_caption:CaptionPlugin"
 
 [project.urls]
 Documentation = "https://github.com/tobiasah/mkdocs-caption#readme"
@@ -40,6 +40,15 @@ Source = "https://github.com/tobiasah/mkdocs-caption"
 
 [tool.hatch.version]
 path = "src/mkdocs_caption/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "/.github",
+  "/docs",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mkdocs_caption"]
 
 [tool.hatch.envs.default]
 dependencies = [

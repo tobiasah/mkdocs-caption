@@ -1,7 +1,11 @@
+import typing as t
+
 from mkdocs.config import base, config_options
 
 
 class IdentifierCaption(base.Config):
+    """The generic configuration options for a specific identifier."""
+
     enable = config_options.Type(bool, default=True)
     start_index = config_options.Type(int, default=1)
     increment_index = config_options.Type(int, default=1)
@@ -18,3 +22,11 @@ class CaptionConfig(base.Config):
     table = config_options.SubConfig(IdentifierCaption)
     figure = config_options.SubConfig(IdentifierCaption)
     custom = config_options.SubConfig(IdentifierCaption)
+
+
+def update_config(config: CaptionConfig, updates: t.Dict[str, t.Any]) -> CaptionConfig:
+    config.additional_identifier = updates.get("additional_identifier", config.additional_identifier)
+    config.table.load_dict(updates.get("table", {}))
+    config.figure.load_dict(updates.get("figure", {}))
+    config.custom.load_dict(updates.get("custom", {}))
+    return config

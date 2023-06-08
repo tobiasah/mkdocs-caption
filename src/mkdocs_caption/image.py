@@ -46,9 +46,13 @@ def postprocess_html(tree: etree._Element, config: IdentifierCaption) -> None:
         return
     index = config.start_index
     for img_element in tree.xpath("//p/a/img|//p/img"):
-        title = img_element.get("title")
+        title = img_element.get("title", img_element.get("alt", None))
         custom_id = img_element.get("id", config.identifier.format(index=index, identifier="figure"))
-        update_references(tree, custom_id, config.reference_text.format(index=index, identifier="figure"))
+        update_references(
+            tree,
+            custom_id,
+            config.reference_text.format(index=index, identifier="figure"),
+        )
         if title is not None:
             caption_element = etree.Element("figcaption", None, None)
             caption_prefix = config.caption_prefix.format(index=index, identifier="Figure")

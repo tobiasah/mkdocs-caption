@@ -1,6 +1,7 @@
 from lxml import etree
 from mkdocs.config.defaults import MkDocsConfig
 from mkdocs.plugins import BasePlugin
+from mkdocs.structure.pages import Page
 
 from mkdocs_caption import config, custom, image, table
 
@@ -18,10 +19,24 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
     """
 
     def on_config(self, config: MkDocsConfig, **_) -> MkDocsConfig:
-        self._config = config.plugins["mkdocs-caption"].config
+        self._config = config.plugins["caption"].config
         return config
 
-    def on_page_markdown(self, markdown: str, **_) -> str:
+    def _get_config(self, page: Page) -> config.CaptionConfig:
+        """Get the configuration for a page.
+
+        This is done by merging the global configuration with the page-specific.
+
+        Args:
+            page: current page
+
+        Returns:
+            The configuration for the page.
+        """
+        page_config = page.meta.get("caption", {})
+        return config.update_config(self._config.copy(), page_config)
+
+    def on_page_markdown(self, markdown: str, *, page: Page, **_) -> str:
         """Process the Markdown content of a page.
 
         The `page_markdown` event is called after the page's markdown is loaded
@@ -37,17 +52,18 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
         Returns:
             The processed Markdown content of the page.
         """
+        config = self._get_config(page)
         if self._config["table"]["enable"]:
             markdown = table.preprocess_markdown(markdown, ["Table"])
         identifier = []
-        if self._config["custom"]["enable"]:
-            identifier += self._config["additional_identifier"]
-            if self._config["figure"]["enable"]:
+        if config["custom"]["enable"]:
+            identifier += config["additional_identifier"]
+            if config["figure"]["enable"]:
                 identifier += ["Figure"]
             markdown = custom.preprocess_markdown(markdown, identifier)
         return markdown
 
-    def on_page_content(self, html: str, **_) -> str:
+    def on_page_content(self, html: str, *, page: Page, **_) -> str:
         """Process the HTML content of a rendered page.
 
         The `page_content` event is called after the Markdown text is rendered to
@@ -63,9 +79,10 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
         Returns:
             The processed HTML content of the page.
         """
+        config = self._get_config(page)
         parser = etree.HTMLParser()
         tree = etree.fromstring(html, parser)
-        table.postprocess_html(tree, self._config["table"])
-        custom.postprocess_html(tree, self._config["custom"])
-        image.postprocess_html(tree, self._config["figure"])
+        table.postprocess_html(tree, config["table"])
+        custom.postprocess_html(tree, config["custom"])
+        image.postprocess_html(tree, config["figure"])
         return etree.tostring(tree, encoding="unicode")
