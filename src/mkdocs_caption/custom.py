@@ -59,10 +59,12 @@ def _wrap_in_figure(
     figure_element.insert(0, target_element)
 
     # add caption
-    fig_caption_element = etree.Element("figcaption", None, None)
-    fig_caption_element.text = (
-        f"{config.caption_prefix.format(identifier = identifier, index = index)} {caption_element.text}"
-    )
+    caption_prefix = config.caption_prefix.format(identifier=identifier, index=index)
+    try:
+        fig_caption_element = etree.fromstring(f"<figcaption>{caption_prefix} {caption_element.text}</figcaption>")
+    except etree.XMLSyntaxError as e:
+        e.msg = f"Invalid XML in caption: {caption_element.text}"
+        raise e
     figure_element.append(fig_caption_element)
 
     figure_id = caption_element.attrib.get("id", config.identifier.format(identifier=identifier, index=index))

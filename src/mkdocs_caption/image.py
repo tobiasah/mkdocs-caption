@@ -51,11 +51,14 @@ def postprocess_html(tree: etree._Element, config: IdentifierCaption) -> None:
         update_references(
             tree,
             custom_id,
-            config.reference_text.format(index=index, identifier="figure"),
+            config.reference_text.format(index=index, identifier="Figure"),
         )
-        if title is not None:
-            caption_element = etree.Element("figcaption", None, None)
+        if title:
             caption_prefix = config.caption_prefix.format(index=index, identifier="Figure")
-            caption_element.text = f"{caption_prefix} {title}"
+            try:
+                caption_element = etree.fromstring(f"<figcaption>{caption_prefix} {title}</figcaption>")
+            except etree.XMLSyntaxError as e:
+                e.msg = f"Invalid XML in caption: {title}"
+                raise e
             wrap_image(img_element, custom_id, caption_element, config.position)
             index += config.increment_index

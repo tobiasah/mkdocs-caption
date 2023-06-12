@@ -64,10 +64,12 @@ def _add_caption_to_table(
         caption_element: The caption element to use for the caption text.
         index: The index of the table element.
     """
-    table_caption_element = etree.Element("caption", None, None)
-    table_caption_element.text = (
-        f"{config.caption_prefix.format(index=index, identifier='Table')} {caption_element.text}"
-    )
+    caption_prefix = config.caption_prefix.format(index=index, identifier="Table")
+    try:
+        table_caption_element = etree.fromstring(f"<caption>{caption_prefix} {caption_element.text}</caption>")
+    except etree.XMLSyntaxError as e:
+        e.msg = f"Invalid XML in caption: {caption_element.text}"
+        raise e
     table_element.insert(0, table_caption_element)
 
     if "cols" in caption_element.attrib:
@@ -76,7 +78,7 @@ def _add_caption_to_table(
     table_element.attrib.update(caption_element.attrib)
     table_id = table_element.attrib.get("id", config.identifier.format(index=index, identifier="table"))
     table_element.attrib["id"] = table_id
-    update_references(tree, table_id, config.reference_text.format(index=index, identifier="table"))
+    update_references(tree, table_id, config.reference_text.format(index=index, identifier="Table"))
 
 
 def postprocess_html(tree: etree._Element, config: IdentifierCaption) -> None:
