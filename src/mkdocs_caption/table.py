@@ -65,10 +65,11 @@ def _add_caption_to_table(
         index: The index of the table element.
     """
     caption_prefix = config.caption_prefix.format(index=index, identifier="Table")
+    caption_text = caption_element.text.replace(" & ", " &amp; ") if caption_element.text else ""
     try:
-        table_caption_element = etree.fromstring(f"<caption>{caption_prefix} {caption_element.text}</caption>")
+        table_caption_element = etree.fromstring(f"<caption>{caption_prefix} {caption_text}</caption>")
     except etree.XMLSyntaxError as e:
-        e.msg = f"Invalid XML in caption: {caption_element.text}"
+        e.msg = f"Invalid XML in caption: <caption>{caption_prefix} {caption_text}</caption>"
         raise e
     table_element.insert(0, table_caption_element)
 
