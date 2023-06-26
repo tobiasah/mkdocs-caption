@@ -101,12 +101,9 @@ all = [
 
 [tool.black]
 target-version = ["py37"]
-line-length = 120
-skip-string-normalization = true
 
 [tool.ruff]
 target-version = "py37"
-line-length = 120
 select = [
   "A",
   "ARG",
@@ -137,6 +134,8 @@ select = [
 ignore = [
   # Using `xml` to parse untrusted data
   "S320",
+  # Too many arguments to function call
+  "PLR0913",
 ]
 
 [tool.ruff.isort]

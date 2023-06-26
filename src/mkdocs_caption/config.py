@@ -18,14 +18,18 @@ class IdentifierCaption(base.Config):
 class CaptionConfig(base.Config):
     """The configuration options for the Caption plugin."""
 
-    additional_identifier = config_options.ListOfItems(config_options.Type(str), default=[])
+    additional_identifier = config_options.ListOfItems(
+        config_options.Type(str), default=[]
+    )
     table = config_options.SubConfig(IdentifierCaption)
     figure = config_options.SubConfig(IdentifierCaption)
     custom = config_options.SubConfig(IdentifierCaption)
 
 
 def update_config(config: CaptionConfig, updates: t.Dict[str, t.Any]) -> CaptionConfig:
-    config.additional_identifier = updates.get("additional_identifier", config.additional_identifier)
+    config.additional_identifier = updates.get(
+        "additional_identifier", config.additional_identifier
+    )
     config.table.load_dict(updates.get("table", {}))
     config.figure.load_dict(updates.get("figure", {}))
     config.custom.load_dict(updates.get("custom", {}))

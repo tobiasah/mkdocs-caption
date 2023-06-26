@@ -4,6 +4,7 @@ from mkdocs.plugins import BasePlugin
 from mkdocs.structure.pages import Page
 
 from mkdocs_caption import config, custom, image, table
+from mkdocs_caption.logger import get_logger
 
 
 class CaptionPlugin(BasePlugin[config.CaptionConfig]):
@@ -52,15 +53,19 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
         Returns:
             The processed Markdown content of the page.
         """
+        logger = get_logger(page.file.src_path)
         config = self._get_config(page)
-        if self._config["table"]["enable"]:
-            markdown = table.preprocess_markdown(markdown, ["Table"])
-        identifier = []
-        if config["custom"]["enable"]:
-            identifier += config["additional_identifier"]
-            if config["figure"]["enable"]:
-                identifier += ["Figure"]
-            markdown = custom.preprocess_markdown(markdown, identifier)
+        try:
+            if self._config["table"]["enable"]:
+                markdown = table.preprocess_markdown(markdown, ["Table"])
+            identifier = []
+            if config["custom"]["enable"]:
+                identifier += config["additional_identifier"]
+                if config["figure"]["enable"]:
+                    identifier += ["Figure"]
+                markdown = custom.preprocess_markdown(markdown, identifier)
+        except Exception as e:
+            logger.error(f"Unexpected Error while preprocessing, skipping: {e}")
         return markdown
 
     def on_page_content(self, html: str, *, page: Page, **_) -> str:
@@ -79,10 +84,17 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
         Returns:
             The processed HTML content of the page.
         """
+        logger = get_logger(page.file.src_path)
         config = self._get_config(page)
-        parser = etree.HTMLParser()
-        tree = etree.fromstring(html, parser)
-        table.postprocess_html(tree, config["table"])
-        custom.postprocess_html(tree, config["custom"])
-        image.postprocess_html(tree, config["figure"])
-        return etree.tostring(tree, encoding="unicode")
+        try:
+            parser = etree.HTMLParser()
+            tree = etree.fromstring(html, parser)
+            if not tree:
+                return html
+            table.postprocess_html(tree, config["table"], logger)
+            custom.postprocess_html(tree, config["custom"], logger)
+            image.postprocess_html(tree, config["figure"], logger)
+            return etree.tostring(tree, encoding="unicode")
+        except Exception as e:
+            logger.error(f"Unexpected Error skipping: {e}")
+            return html
