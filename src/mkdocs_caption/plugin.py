@@ -89,12 +89,12 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
         try:
             parser = etree.HTMLParser()
             tree = etree.fromstring(html, parser)
-            if not tree:
+            if tree is None:
                 return html
             table.postprocess_html(tree, config["table"], logger)
             custom.postprocess_html(tree, config["custom"], logger)
             image.postprocess_html(tree, config["figure"], logger)
-            return etree.tostring(tree, encoding="unicode")
+            return etree.tostring(tree, encoding="unicode", method="html")
         except Exception as e:
             logger.error(f"Unexpected Error skipping: {e}")
             return html
