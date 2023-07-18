@@ -94,7 +94,9 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
             table.postprocess_html(tree, config["table"], logger)
             custom.postprocess_html(tree, config["custom"], logger)
             image.postprocess_html(tree, config["figure"], logger)
-            return etree.tostring(tree, encoding="unicode", method="html")
+            html_result = etree.tostring(tree, encoding="unicode", method="html")
+            # HTMLParser adds <html><body> tags, remove them
+            return html_result[len("<html><body>") : -len("</body></html>")]
         except Exception as e:
             logger.error(f"Unexpected Error skipping: {e}")
             return html
