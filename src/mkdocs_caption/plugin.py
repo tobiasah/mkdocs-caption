@@ -1,6 +1,6 @@
 from lxml import etree
 from mkdocs.config.defaults import MkDocsConfig
-from mkdocs.plugins import BasePlugin
+from mkdocs.plugins import BasePlugin, event_priority
 from mkdocs.structure.pages import Page
 
 from mkdocs_caption import config, custom, image, table
@@ -37,6 +37,7 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
         page_config = page.meta.get("caption", {})
         return config.update_config(self._config.copy(), page_config)
 
+    @event_priority(-100)
     def on_page_markdown(self, markdown: str, *, page: Page, **_) -> str:
         """Process the Markdown content of a page.
 
