@@ -44,7 +44,7 @@ plugins:
 - caption
 ```
 
-Inside the Markdown the follwoining will now be converted into a figure/table with 
+Inside the Markdown, the following will now be converted into a figure/table with 
 caption and numbering.
 
 ```
@@ -133,7 +133,7 @@ Table: table caption
 | content 1 | content 2 |
 ...
 ```
-Each captioned table is also assosiated with an id, which by default is constructed
+Each captioned table is also associated with an id, which by default is constructed
 from the table number (`_table-x`). It is also possible to overwrite the default id
 by adding an attribute `id` to the table (see below). The id can be used to link to the
 table. The plugin also adds a link text (`table x`) to all references without a link text.
@@ -146,11 +146,11 @@ take a look at [](#_table-1).
 take a look at <a href="#_table-1">table 1</a>.
 ```
 
-The caption can also be extendet by attributes that are automatically added to the
-table element. The attributes are specified similar to image attributes be curly brackets.
+The caption can also be extended by attributes that are automatically added to the
+table element. The attributes are specified similar to image attributes to be curly brackets.
 There are two attributes that have special meaning: `id` and `cols`.
 The `id` attribute is used to overwrite the default id of the table. The `cols`
-attribute can be used to controll the column width of the table.
+attribute can be used to control the column width of the table.
 
 ```
 Table: table caption {id="my-table" cols="1,3"}
@@ -188,9 +188,9 @@ Note that the sum of the specified column widths is treated as 100%.
 
 ## Custom captions
 
-In addition to tables and figures the plugin also supports custom captions. 
+In addition to tables and figures, the plugin also supports custom captions. 
 Custom captions must be manually defined in the `mkdocs.yml` file. Similar to 
-table captions the are placed right before the target element (e.g. an enumeration).
+table captions, they are placed right before the target element (e.g. an enumeration).
 The plugin will wrap the target element in a figure with the specified caption and
 options.
 
@@ -259,7 +259,7 @@ plugins:
       caption_prefix: '{identifier} {index}:'
 ```
 
-The `{index}` placeholders is replaced with the current index. The `{identifier}` placeholder
+The `{index}` placeholders are replaced with the current index. The `{identifier}` placeholder
 is replaced with the identifier of the current element and is only relevant for the custom option.  
 
 It is also possible to overwrite the default configuration for a specific page. This can be

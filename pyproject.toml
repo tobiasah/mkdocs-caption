@@ -104,39 +104,24 @@ target-version = ["py37"]
 
 [tool.ruff]
 target-version = "py37"
-select = [
-  "A",
-  "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
-  "F",
-  "FBT",
-  "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PLC",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
-]
+select = ["ALL"]
 ignore = [
   # Using `xml` to parse untrusted data
   "S320",
   # Too many arguments to function call
   "PLR0913",
+  # Use `logging.exception` instead of `logging.error`
+  "TRY400",
+  # Missing docstring in `__init__`
+  "D107",
+  # Missing type annotation for `self` in method
+  "ANN101",
+  # Missing type annotation for `**kwargs`
+  "ANN003",
 ]
+
+[tool.ruff.pydocstyle]
+convention = "google"
 
 [tool.ruff.isort]
 known-first-party = ["mkdocs_caption"]

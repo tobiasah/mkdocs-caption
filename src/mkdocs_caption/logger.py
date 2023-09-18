@@ -1,23 +1,29 @@
+"""Setup custom logger that is mkdocs compatible."""
+from __future__ import annotations
+
 import logging
 import typing as t
 
 
 class PluginLogger(logging.LoggerAdapter):
-    """A logger adapter to prefix messages with the originating package name."""
+    """A logger adapter to prefix messages with the originating package name.
 
-    def __init__(self, prefix: str, filename: str, logger: logging.Logger):
-        """Initialize the object.
-
-        Args:
-            prefix: The string to insert in front of every message.
+    Args:
+        prefix: The string to insert in front of every message.
             logger: The logger instance.
-        """
+        filename: python script filename
+        logger: logger instance
+    """
+
+    def __init__(self, prefix: str, filename: str, logger: logging.Logger) -> None:
         super().__init__(logger, {})
         self._prefix = prefix
         self._filename = filename
 
     def process(
-        self, msg: str, kwargs: t.MutableMapping[str, t.Any]
+        self,
+        msg: str,
+        kwargs: t.MutableMapping[str, t.Any],
     ) -> tuple[str, t.Any]:
         """Process the message.
 
@@ -35,7 +41,7 @@ def get_logger(filename: str) -> PluginLogger:
     """Return a logger for plugins.
 
     Args:
-        filename: filename
+        filename: python script filename
 
     Returns:
         A logger configured to work well in MkDocs, prefixing each message

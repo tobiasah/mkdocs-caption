@@ -1,22 +1,28 @@
+"""Custom caption handling."""
+from __future__ import annotations
+
 import typing as t
 
 from lxml import etree
 
-from mkdocs_caption.config import IdentifierCaption
-from mkdocs_caption.helper import update_references, wrap_md_captions
-from mkdocs_caption.logger import PluginLogger
+from mkdocs_caption.helper import TreeElement, update_references, wrap_md_captions
+
+if t.TYPE_CHECKING:
+    from mkdocs_caption.config import IdentifierCaption
+    from mkdocs_caption.logger import PluginLogger
 
 CAPTION_TAG = "custom-caption"
 
 
-def preprocess_markdown(markdown: str, identifier: t.List[str]) -> str:
-    """Preprocess markdown to wrap custom captions
+def preprocess_markdown(markdown: str, identifier: list[str]) -> str:
+    """Preprocess markdown to wrap custom captions.
 
     The custom captions are wrapped in a custom html
     tag to make them easier to find later.
 
     Args:
         markdown: markdown string
+        identifier: list of identifiers to wrap
 
     Returns:
         markdown string with custom captions wrapped
@@ -25,9 +31,9 @@ def preprocess_markdown(markdown: str, identifier: t.List[str]) -> str:
 
 
 def _wrap_in_figure(
-    caption_element: etree._Element,
+    caption_element: TreeElement,
     *,
-    tree: etree._Element,
+    tree: TreeElement,
     index: int,
     identifier: str,
     config: IdentifierCaption,
@@ -40,11 +46,11 @@ def _wrap_in_figure(
     with a custom caption based on the caption element, index, and identifier.
 
     Args:
-        target_element: The element to wrap in a figure element.
-        tree: The root element of the XML tree.
         caption_element: The caption element to use for the caption text.
+        tree: The root element of the XML tree.
         index: The index of the figure element.
         identifier: The identifier of the custom caption.
+        config: The plugin configuration.
         logger: Current plugin logger.
     """
     a_wrapper = caption_element.getparent()
@@ -66,15 +72,16 @@ def _wrap_in_figure(
     caption_prefix = config.caption_prefix.format(identifier=identifier, index=index)
     try:
         fig_caption_element = etree.fromstring(
-            f"<figcaption>{caption_prefix} {caption_element.text}</figcaption>"
+            f"<figcaption>{caption_prefix} {caption_element.text}</figcaption>",
         )
     except etree.XMLSyntaxError:
-        logger.error(f"Invalid XML in caption: {caption_element.text}")
+        logger.error("Invalid XML in caption: %s", caption_element.text)
         return
     figure_element.append(fig_caption_element)
 
     figure_id = caption_element.attrib.get(
-        "id", config.identifier.format(identifier=identifier, index=index)
+        "id",
+        config.identifier.format(identifier=identifier, index=index),
     )
     figure_element.attrib["id"] = figure_id
     update_references(
@@ -89,7 +96,9 @@ def _wrap_in_figure(
 
 
 def postprocess_html(
-    tree: etree._Element, config: IdentifierCaption, logger: PluginLogger
+    tree: TreeElement,
+    config: IdentifierCaption,
+    logger: PluginLogger,
 ) -> None:
     """Handle custom captions in an XML tree.
 
@@ -103,7 +112,7 @@ def postprocess_html(
     """
     if not config.enable:
         return
-    index_dict: t.Dict[str, int] = {}
+    index_dict: dict[str, int] = {}
     for custom_caption in tree.xpath(f"//{CAPTION_TAG}"):
         identifier = custom_caption.attrib.pop("identifier")
         index = index_dict.get(identifier, 1)

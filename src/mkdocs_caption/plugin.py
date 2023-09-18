@@ -1,3 +1,4 @@
+"""MkDocs plugin for custom image and table captions."""
 from lxml import etree
 from mkdocs.config.defaults import MkDocsConfig
 from mkdocs.plugins import BasePlugin, event_priority
@@ -20,6 +21,16 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
     """
 
     def on_config(self, config: MkDocsConfig, **_) -> MkDocsConfig:
+        """Called by MkDocs when parsing the config.
+
+        We just store the config for later use.
+
+        Args:
+            config: The global configuration object.
+
+        Returns:
+            The global configuration object.
+        """
         self._config = config.plugins["caption"].config
         return config
 
@@ -65,8 +76,8 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
                 if config["figure"]["enable"]:
                     identifier += ["Figure"]
                 markdown = custom.preprocess_markdown(markdown, identifier)
-        except Exception as e:
-            logger.error(f"Unexpected Error while preprocessing, skipping: {e}")
+        except Exception as e:  # noqa: BLE001
+            logger.error("Unexpected Error while preprocessing, skipping: %s", e)
         return markdown
 
     def on_page_content(self, html: str, *, page: Page, **_) -> str:
@@ -98,6 +109,6 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
             html_result = etree.tostring(tree, encoding="unicode", method="html")
             # HTMLParser adds <html><body> tags, remove them
             return html_result[len("<html><body>") : -len("</body></html>")]
-        except Exception as e:
-            logger.error(f"Unexpected Error skipping: {e}")
+        except Exception as e:  # noqa: BLE001
+            logger.error("Unexpected Error skipping: %s", e)
             return html

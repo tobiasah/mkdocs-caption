@@ -1,12 +1,16 @@
+"""Handle image related captioning."""
 from lxml import etree
 
 from mkdocs_caption.config import IdentifierCaption
-from mkdocs_caption.helper import update_references
+from mkdocs_caption.helper import TreeElement, update_references
 from mkdocs_caption.logger import PluginLogger
 
 
 def wrap_image(
-    img: etree._Element, custom_id: str, caption: etree._Element, position: str
+    img: TreeElement,
+    custom_id: str,
+    caption: TreeElement,
+    position: str,
 ) -> None:
     """Wrap an image element in a figure element with a custom caption.
 
@@ -18,6 +22,7 @@ def wrap_image(
         img: The image element to wrap.
         custom_id: The identifier of the custom caption.
         caption: The caption element to use.
+        position: The position of the caption relative to the image. (top, bottom)
     """
     target = img
     parent = img.getparent()
@@ -35,7 +40,9 @@ def wrap_image(
 
 
 def postprocess_html(
-    tree: etree._Element, config: IdentifierCaption, logger: PluginLogger
+    tree: TreeElement,
+    config: IdentifierCaption,
+    logger: PluginLogger,
 ) -> None:
     """Postprocess an XML tree to handle custom image captions.
 
@@ -55,7 +62,8 @@ def postprocess_html(
     for img_element in tree.xpath("//p/a/img|//p/img"):
         title = img_element.get("title", img_element.get("alt", None))
         custom_id = img_element.get(
-            "id", config.identifier.format(index=index, identifier="figure")
+            "id",
+            config.identifier.format(index=index, identifier="figure"),
         )
         update_references(
             tree,
@@ -64,14 +72,15 @@ def postprocess_html(
         )
         if title:
             caption_prefix = config.caption_prefix.format(
-                index=index, identifier="Figure"
+                index=index,
+                identifier="Figure",
             )
             try:
                 caption_element = etree.fromstring(
-                    f"<figcaption>{caption_prefix} {title}</figcaption>"
+                    f"<figcaption>{caption_prefix} {title}</figcaption>",
                 )
             except etree.XMLSyntaxError:
-                logger.error(f"Invalid XML in caption: {title}")
+                logger.error("Invalid XML in caption: %s", title)
                 continue
             wrap_image(img_element, custom_id, caption_element, config.position)
             index += config.increment_index

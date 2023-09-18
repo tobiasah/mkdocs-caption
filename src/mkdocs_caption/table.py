@@ -1,22 +1,28 @@
+"""Handle table related captioning."""
+from __future__ import annotations
+
 import typing as t
 
 from lxml import etree
 
-from mkdocs_caption.config import IdentifierCaption
-from mkdocs_caption.helper import update_references, wrap_md_captions
-from mkdocs_caption.logger import PluginLogger
+from mkdocs_caption.helper import TreeElement, update_references, wrap_md_captions
+
+if t.TYPE_CHECKING:
+    from mkdocs_caption.config import IdentifierCaption
+    from mkdocs_caption.logger import PluginLogger
 
 TABLE_CAPTION_TAG = "table-caption"
 
 
-def preprocess_markdown(markdown: str, identifier: t.List[str]) -> str:
-    """Preprocess markdown to wrap custom captions
+def preprocess_markdown(markdown: str, identifier: list[str]) -> str:
+    """Preprocess markdown to wrap custom captions.
 
     The custom captions are wrapped in a custom html
     tag to make them easier to find later.
 
     Args:
         markdown: markdown string
+        identifier: list of identifiers to wrap
 
     Returns:
         markdown string with custom captions wrapped
@@ -24,7 +30,7 @@ def preprocess_markdown(markdown: str, identifier: t.List[str]) -> str:
     return wrap_md_captions(markdown, identifier, TABLE_CAPTION_TAG)
 
 
-def _create_colgroups(coldef: str) -> etree._Element:
+def _create_colgroups(coldef: str) -> TreeElement:
     """Create a html colgroups element from a column definition.
 
     A coldef is a comma separated list of integers that specify the width of
@@ -47,10 +53,10 @@ def _create_colgroups(coldef: str) -> etree._Element:
 
 
 def _add_caption_to_table(
-    table_element: etree._Element,
+    table_element: TreeElement,
     *,
-    tree: etree._Element,
-    caption_element: etree._Element,
+    tree: TreeElement,
+    caption_element: TreeElement,
     index: int,
     config: IdentifierCaption,
     logger: PluginLogger,
@@ -66,6 +72,8 @@ def _add_caption_to_table(
         tree: The root element of the XML tree.
         caption_element: The caption element to use for the caption text.
         index: The index of the table element.
+        config: The plugin configuration.
+        logger: Current plugin logger.
     """
     caption_prefix = config.caption_prefix.format(index=index, identifier="Table")
     caption_text = (
@@ -73,12 +81,13 @@ def _add_caption_to_table(
     )
     try:
         table_caption_element = etree.fromstring(
-            f"<caption>{caption_prefix} {caption_text}</caption>"
+            f"<caption>{caption_prefix} {caption_text}</caption>",
         )
     except etree.XMLSyntaxError:
         logger.error(
-            f"Invalid XML in caption: <caption>{caption_prefix} "
-            f"{caption_text}</caption>"
+            "Invalid XML in caption: <caption>%s %s</caption>",
+            caption_prefix,
+            caption_text,
         )
         return
     table_element.insert(0, table_caption_element)
@@ -88,16 +97,21 @@ def _add_caption_to_table(
         caption_element.attrib.pop("cols")
     table_element.attrib.update(caption_element.attrib)
     table_id = table_element.attrib.get(
-        "id", config.identifier.format(index=index, identifier="table")
+        "id",
+        config.identifier.format(index=index, identifier="table"),
     )
     table_element.attrib["id"] = table_id
     update_references(
-        tree, table_id, config.reference_text.format(index=index, identifier="Table")
+        tree,
+        table_id,
+        config.reference_text.format(index=index, identifier="Table"),
     )
 
 
 def postprocess_html(
-    tree: etree._Element, config: IdentifierCaption, logger: PluginLogger
+    tree: TreeElement,
+    config: IdentifierCaption,
+    logger: PluginLogger,
 ) -> None:
     """Handle custom captions in an XML tree.
 
@@ -106,10 +120,12 @@ def postprocess_html(
 
     Args:
         tree: The root element of the XML tree.
+        config: The plugin configuration.
+        logger: Current plugin logger.
     """
     if not config.enable:
         return
-    index_dict: t.Dict[str, int] = {}
+    index_dict: dict[str, int] = {}
     for custom_caption in tree.xpath(f"//{TABLE_CAPTION_TAG}"):
         identifier = custom_caption.attrib.pop("identifier")
         index = index_dict.get(identifier, config.start_index)
@@ -118,8 +134,8 @@ def postprocess_html(
         target_element = a_wrapper.getnext()
         if target_element.tag != "table":
             logger.error(
-                "Table caption must be followed by a table element. "
-                f"Skipping: {custom_caption.text}",
+                "Table caption must be followed by a table element. Skipping: %s",
+                custom_caption.text,
             )
             continue
         _add_caption_to_table(

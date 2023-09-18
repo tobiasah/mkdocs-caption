@@ -1,10 +1,23 @@
+"""The configuration options for the Caption plugin."""
+from __future__ import annotations
+
 import typing as t
 
 from mkdocs.config import base, config_options
 
 
 class IdentifierCaption(base.Config):
-    """The generic configuration options for a specific identifier."""
+    """The generic configuration options for a specific identifier.
+
+    Args:
+        enable: Whether to enable the identifier.
+        start_index: The start index (displayed value) for the identifier.
+        increment_index: The increment value for the identifier.
+        position: The position of the identifier relative to the caption.
+        identifier: The identifier to use for the caption.
+        reference_text: The text to use for the reference (if empty).
+        caption_prefix: The prefix to use for the caption.
+    """
 
     enable = config_options.Type(bool, default=True)
     start_index = config_options.Type(int, default=1)
@@ -16,19 +29,38 @@ class IdentifierCaption(base.Config):
 
 
 class CaptionConfig(base.Config):
-    """The configuration options for the Caption plugin."""
+    """The configuration options for the Caption plugin.
+
+    Args:
+        additional_identifier: The additional identifiers to use.
+            (e.g. ["List"])
+        table: The configuration options for tables.
+        figure: The configuration options for figures.
+        custom: The configuration options for custom elements.
+    """
 
     additional_identifier = config_options.ListOfItems(
-        config_options.Type(str), default=[]
+        config_options.Type(str),
+        default=[],
     )
     table = config_options.SubConfig(IdentifierCaption)
     figure = config_options.SubConfig(IdentifierCaption)
     custom = config_options.SubConfig(IdentifierCaption)
 
 
-def update_config(config: CaptionConfig, updates: t.Dict[str, t.Any]) -> CaptionConfig:
+def update_config(config: CaptionConfig, updates: dict[str, t.Any]) -> CaptionConfig:
+    """Update the configuration options with the given updates.
+
+    Args:
+        config: The configuration options to update.
+        updates: The updates to apply to the configuration options.
+
+    Returns:
+        The updated configuration options.
+    """
     config.additional_identifier = updates.get(
-        "additional_identifier", config.additional_identifier
+        "additional_identifier",
+        config.additional_identifier,
     )
     config.table.load_dict(updates.get("table", {}))
     config.figure.load_dict(updates.get("figure", {}))
