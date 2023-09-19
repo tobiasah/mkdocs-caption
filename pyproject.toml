@@ -11,7 +11,7 @@ name = "mkdocs-caption"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = "MIT"
 keywords = []
 authors = [
@@ -20,7 +20,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
@@ -71,8 +70,8 @@ cov = [
   "cov-report",
 ]
 
-[[tool.hatch.envs.all.matrix]]
-python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+[[tool.hatch.envs.lint.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11"]
 
 [tool.hatch.envs.lint]
 detached = true
@@ -100,10 +99,10 @@ all = [
 ]
 
 [tool.black]
-target-version = ["py37"]
+target-version = ["py38"]
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 select = ["ALL"]
 ignore = [
   # Using `xml` to parse untrusted data
@@ -151,3 +150,7 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[[tool.mypy.overrides]]
+module = "lxml"
+ignore_missing_imports = true
