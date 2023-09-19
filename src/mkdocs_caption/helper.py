@@ -25,7 +25,37 @@ def update_references(root: TreeElement, custom_id: str, text: str) -> None:
             ref.text = text
 
 
-def escape_md_caption(match: re.Match, target_tag: str) -> str:
+def _parse_extended_markdown(options: str | None) -> str:
+    """Parse special extended markdown syntax.
+
+    The extended markdown syntax allows for adding classes and ids to
+    markdown elements through the use of the following syntax: .class #id
+    This function parses the options and converts these two use cases into
+    valid html attributes.
+
+    Args:
+        options: The options to parse.
+
+    Returns:
+        The parsed options.
+    """
+    if not options:
+        return ""
+    # Not the nicest solution but I could not find the place where python
+    # markdown parses the options.
+    split_options = options.split(" ")
+    output_options = []
+    for option in split_options:
+        if option.startswith("."):
+            output_options.append("class=" + option[1:])
+        elif option.startswith("#"):
+            output_options.append("id=" + option[1:])
+        else:
+            output_options.append(option)
+    return " ".join(output_options)
+
+
+def _escape_md_caption(match: re.Match, *, target_tag: str) -> str:
     """Escape custom captions in a markdown string.
 
     This function takes a regular expression match object and returns a string
@@ -38,14 +68,14 @@ def escape_md_caption(match: re.Match, target_tag: str) -> str:
     Returns:
         A string with the custom caption escaped using a custom HTML tag.
     """
-    identifier = match.group(1)
+    identifier = match.group(1).rstrip(":")
     caption = match.group(2)
-    options = match.group(4)
+    options = _parse_extended_markdown(match.group(4))
     return f'<{target_tag} identifier="{identifier}" \
         {options}>{caption}</{target_tag}>\n\n'
 
 
-def wrap_md_captions(markdown: str, identifier: list[str], html_tag: str) -> str:
+def wrap_md_captions(markdown: str, *, identifier: str, html_tag: str) -> str:
     """Preprocess markdown to wrap custom captions.
 
     The custom captions are wrapped in a custom html
@@ -53,15 +83,27 @@ def wrap_md_captions(markdown: str, identifier: list[str], html_tag: str) -> str
 
     Args:
         markdown: markdown string
-        identifier: list of identifiers to wrap
+        identifier: identifier to wrap
         html_tag: html tag to wrap the caption in
 
     Returns:
         markdown string with custom captions wrapped
     """
     return re.sub(
-        rf"({'|'.join(identifier)}): (.*?)({{(.*?)}})?\n\n",
-        lambda match: escape_md_caption(match, html_tag),
+        rf"({identifier}) (.*?)({{(.*?)}})?\n\n",
+        lambda match: _escape_md_caption(match, target_tag=html_tag),
         markdown,
         flags=re.MULTILINE | re.DOTALL,
     )
+
+
+def sanitize_caption(caption: str | None) -> str:
+    """Sanitize a caption to be used as an id.
+
+    Args:
+        caption: The caption to sanatize.
+
+    Returns:
+        The sanitized caption.
+    """
+    return caption.replace(" & ", " &amp; ") if caption else ""

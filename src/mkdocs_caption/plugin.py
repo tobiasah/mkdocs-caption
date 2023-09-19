@@ -68,16 +68,35 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
         logger = get_logger(page.file.src_path)
         config = self._get_config(page)
         try:
-            if self._config["table"]["enable"]:
-                markdown = table.preprocess_markdown(markdown, ["Table"])
-            identifier = []
-            if config["custom"]["enable"]:
-                identifier += config["additional_identifier"]
-                if config["figure"]["enable"]:
-                    identifier += ["Figure"]
-                markdown = custom.preprocess_markdown(markdown, identifier)
+            markdown = table.preprocess_markdown(markdown, config=self._config.table)
         except Exception as e:  # noqa: BLE001
-            logger.error("Unexpected Error while preprocessing, skipping: %s", e)
+            logger.error(
+                "Unexpected Error while preprocessing the tables, skipping: %s",
+                e,
+            )
+        try:
+            markdown = image.preprocess_markdown(markdown, config=self._config.figure)
+        except Exception as e:  # noqa: BLE001
+            logger.error(
+                "Unexpected Error while preprocessing the images, skipping: %s",
+                e,
+            )
+        try:
+            identifiers = [
+                self._config.custom.get_markdown_identifier(x)
+                for x in config.additional_identifier
+            ]
+            markdown = custom.preprocess_markdown(
+                markdown,
+                config=self._config.custom,
+                identifiers=identifiers,
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.error(
+                "Unexpected Error while preprocessing the custom, skipping: %s",
+                e,
+            )
+
         return markdown
 
     def on_page_content(self, html: str, *, page: Page, **_) -> str:
@@ -103,9 +122,9 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
             tree = etree.fromstring(html, parser)
             if tree is None:
                 return html
-            table.postprocess_html(tree, config["table"], logger)
-            custom.postprocess_html(tree, config["custom"], logger)
-            image.postprocess_html(tree, config["figure"], logger)
+            table.postprocess_html(tree=tree, config=config["table"], logger=logger)
+            custom.postprocess_html(tree=tree, config=config["custom"], logger=logger)
+            image.postprocess_html(tree=tree, config=config["figure"], logger=logger)
             html_result = etree.tostring(tree, encoding="unicode", method="html")
             # HTMLParser adds <html><body> tags, remove them
             return html_result[len("<html><body>") : -len("</body></html>")]
