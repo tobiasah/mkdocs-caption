@@ -24,7 +24,7 @@ class PluginLogger(logging.LoggerAdapter):
         self,
         msg: str,
         kwargs: t.MutableMapping[str, t.Any],
-    ) -> tuple[str, t.Any]:
+    ) -> t.Tuple[str, t.Any]:
         """Process the message.
 
         Args:
