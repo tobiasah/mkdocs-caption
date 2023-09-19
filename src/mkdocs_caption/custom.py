@@ -14,7 +14,12 @@ if t.TYPE_CHECKING:
 CAPTION_TAG = "custom-caption"
 
 
-def preprocess_markdown(markdown: str, identifier: list[str]) -> str:
+def preprocess_markdown(
+    markdown: str,
+    *,
+    config: IdentifierCaption,
+    identifiers: list[str],
+) -> str:
     """Preprocess markdown to wrap custom captions.
 
     The custom captions are wrapped in a custom html
@@ -22,12 +27,22 @@ def preprocess_markdown(markdown: str, identifier: list[str]) -> str:
 
     Args:
         markdown: markdown string
-        identifier: list of identifiers to wrap
+        config: plugin configuration for custom captions
+        identifiers: list of identifiers to wrap
 
     Returns:
         markdown string with custom captions wrapped
     """
-    return wrap_md_captions(markdown, identifier, CAPTION_TAG)
+    if not config.enable:
+        return markdown
+    for identifier in identifiers:
+        md_identifier = config.get_markdown_identifier(identifier)
+        markdown = wrap_md_captions(
+            markdown,
+            identifier=md_identifier,
+            html_tag=CAPTION_TAG,
+        )
+    return markdown
 
 
 def _wrap_in_figure(
@@ -69,7 +84,7 @@ def _wrap_in_figure(
     figure_element.insert(0, target_element)
 
     # add caption
-    caption_prefix = config.caption_prefix.format(identifier=identifier, index=index)
+    caption_prefix = config.get_caption_prefix(identifier=identifier, index=index)
     try:
         fig_caption_element = etree.fromstring(
             f"<figcaption>{caption_prefix} {caption_element.text}</figcaption>",
@@ -81,13 +96,13 @@ def _wrap_in_figure(
 
     figure_id = caption_element.attrib.get(
         "id",
-        config.identifier.format(identifier=identifier, index=index),
+        config.get_default_id(identifier=identifier, index=index),
     )
     figure_element.attrib["id"] = figure_id
     update_references(
         tree,
         figure_id,
-        config.reference_text.format(identifier=identifier, index=index),
+        config.get_reference_text(identifier=identifier, index=index),
     )
     a_wrapper.remove(caption_element)
     parent = a_wrapper.getparent()
@@ -96,6 +111,7 @@ def _wrap_in_figure(
 
 
 def postprocess_html(
+    *,
     tree: TreeElement,
     config: IdentifierCaption,
     logger: PluginLogger,

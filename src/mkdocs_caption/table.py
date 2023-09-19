@@ -5,7 +5,12 @@ import typing as t
 
 from lxml import etree
 
-from mkdocs_caption.helper import TreeElement, update_references, wrap_md_captions
+from mkdocs_caption.helper import (
+    TreeElement,
+    sanitize_caption,
+    update_references,
+    wrap_md_captions,
+)
 
 if t.TYPE_CHECKING:
     from mkdocs_caption.config import IdentifierCaption
@@ -14,7 +19,7 @@ if t.TYPE_CHECKING:
 TABLE_CAPTION_TAG = "table-caption"
 
 
-def preprocess_markdown(markdown: str, identifier: list[str]) -> str:
+def preprocess_markdown(markdown: str, *, config: IdentifierCaption) -> str:
     """Preprocess markdown to wrap custom captions.
 
     The custom captions are wrapped in a custom html
@@ -22,12 +27,15 @@ def preprocess_markdown(markdown: str, identifier: list[str]) -> str:
 
     Args:
         markdown: markdown string
-        identifier: list of identifiers to wrap
+        config: plugin configuration for tables
 
     Returns:
         markdown string with custom captions wrapped
     """
-    return wrap_md_captions(markdown, identifier, TABLE_CAPTION_TAG)
+    if not config.enable:
+        return markdown
+    identifier = config.get_markdown_identifier("table")
+    return wrap_md_captions(markdown, identifier=identifier, html_tag=TABLE_CAPTION_TAG)
 
 
 def _create_colgroups(coldef: str) -> TreeElement:
@@ -75,10 +83,8 @@ def _add_caption_to_table(
         config: The plugin configuration.
         logger: Current plugin logger.
     """
-    caption_prefix = config.caption_prefix.format(index=index, identifier="Table")
-    caption_text = (
-        caption_element.text.replace(" & ", " &amp; ") if caption_element.text else ""
-    )
+    caption_prefix = config.get_caption_prefix(index=index, identifier="table")
+    caption_text = sanitize_caption(caption_element.text)
     try:
         table_caption_element = etree.fromstring(
             f"<caption>{caption_prefix} {caption_text}</caption>",
@@ -98,17 +104,18 @@ def _add_caption_to_table(
     table_element.attrib.update(caption_element.attrib)
     table_id = table_element.attrib.get(
         "id",
-        config.identifier.format(index=index, identifier="table"),
+        config.get_default_id(index=index, identifier="table"),
     )
     table_element.attrib["id"] = table_id
     update_references(
         tree,
         table_id,
-        config.reference_text.format(index=index, identifier="Table"),
+        config.get_reference_text(index=index, identifier="table"),
     )
 
 
 def postprocess_html(
+    *,
     tree: TreeElement,
     config: IdentifierCaption,
     logger: PluginLogger,
@@ -125,26 +132,26 @@ def postprocess_html(
     """
     if not config.enable:
         return
-    index_dict: dict[str, int] = {}
-    for custom_caption in tree.xpath(f"//{TABLE_CAPTION_TAG}"):
-        identifier = custom_caption.attrib.pop("identifier")
-        index = index_dict.get(identifier, config.start_index)
-        index_dict[identifier] = index + config.increment_index
-        a_wrapper = custom_caption.getparent()
+    index = config.start_index
+    for table_caption in tree.xpath(f"//{TABLE_CAPTION_TAG}"):
+        # unused attribute identifier
+        table_caption.attrib.pop("identifier")
+        a_wrapper = table_caption.getparent()
         target_element = a_wrapper.getnext()
         if target_element.tag != "table":
             logger.error(
                 "Table caption must be followed by a table element. Skipping: %s",
-                custom_caption.text,
+                table_caption.text,
             )
             continue
         _add_caption_to_table(
             target_element,
             tree=tree,
-            caption_element=custom_caption,
+            caption_element=table_caption,
             index=index,
             config=config,
             logger=logger,
         )
-        a_wrapper.remove(custom_caption)
+        a_wrapper.remove(table_caption)
         a_wrapper.getparent().remove(a_wrapper)
+        index += config.increment_index

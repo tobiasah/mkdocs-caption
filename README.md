@@ -116,6 +116,29 @@ take a look at [](#_figure-1).
 take a look at <a href="#_figure-1">figure 1</a>.
 ```
 
+### Customizing The Figure Element
+
+MKDocs allows customizing the image element by adding attributes to the image tag.
+This is done by adding a curly bracket after the image tag and specifying the attributes
+inside the curly brackets. To apply the same kind of customization to the figure element
+the plugin allows adding attributes to the figure element. To maintain compatibility
+with the general Markdown syntax, one needs to use a separate line for the figure
+caption.
+
+```
+Figure: figure caption {class="my-class"}
+
+![](img.jpg)
+```
+
+This will result in 
+
+```html
+<figure id="_figure-1" class="my-class">
+  <img src="img.jpg" />
+  <figcaption>Figure 1. figure caption</figcaption>
+```
+
 ## Tables
 
 The plugin allows easy captioning of tables in markdown. Since Markdown does not
@@ -238,29 +261,44 @@ plugins:
       start_index: 1
       increment_index: 1
       position: bottom  # (top, bottom)
-      identifier: '_table-{index}'
-      reference_text: 'table {index}'
+      default_id: '_table-{index}'
+      reference_text: 'Table {index}'
       caption_prefix: 'Table {index}:'
+      markdown_identifier: 'Table:'
     figure:
       enable: true
       start_index: 1
       increment_index: 1
       position: bottom
-      identifier: '_figure-{index}'
-      reference_text: 'figure {index}'
-      caption_prefix: 'figure {index}:'
+      default_id: '_figure-{index}'
+      reference_text: 'Figure {index}'
+      caption_prefix: 'Figure {index}:'
+      markdown_identifier: 'Figure:'
     custom:
       enable: true
       start_index: 1
       increment_index: 1
       position: bottom
-      identifier: '_{identifier}-{index}'
-      reference_text: '{identifier} {index}'
-      caption_prefix: '{identifier} {index}:'
+      default_id: '_{identifier}-{index}'
+      reference_text: '{Identifier} {index}'
+      caption_prefix: '{Identifier} {index}:'
+      markdown_identifier: '{Identifier}:'
 ```
 
 The `{index}` placeholders are replaced with the current index. The `{identifier}` placeholder
-is replaced with the identifier of the current element and is only relevant for the custom option.  
+is replaced with the lower case identifier and the `{Identifier}` is replaced with the 
+capitalized identifier.
+
+| Option | Description |
+| --- | --- |
+| enable | Enable/disable the captioning/plugin for the specified identifier |
+| start_index | The index to start with |
+| increment_index | The increment for the index |
+| position | The position of the caption (top, bottom) relative to the target element |
+| default_id | The default id assigned to the resulting HTML element |
+| reference_text | The text used for references to this element. Note, this only will be applied if the anchor does not specify its own link text |
+| caption_prefix | The prefix put before of the caption text |
+| markdown_identifier | The identifier that this plugin will search for in the markdown. (Note that every match of this identifier will be treated as a caption element. A false match will most likely result in an error) |
 
 It is also possible to overwrite the default configuration for a specific page. This can be
 done by adding a `caption` section to the page header.

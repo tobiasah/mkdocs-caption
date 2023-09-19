@@ -13,8 +13,8 @@ class IdentifierCaption(base.Config):
         enable: Whether to enable the identifier.
         start_index: The start index (displayed value) for the identifier.
         increment_index: The increment value for the identifier.
-        position: The position of the identifier relative to the caption.
-        identifier: The identifier to use for the caption.
+        position: The position of the caption relative to the element.
+        default_id: The  to use for the caption.
         reference_text: The text to use for the reference (if empty).
         caption_prefix: The prefix to use for the caption.
     """
@@ -23,9 +23,79 @@ class IdentifierCaption(base.Config):
     start_index = config_options.Type(int, default=1)
     increment_index = config_options.Type(int, default=1)
     position = config_options.Choice(("top", "bottom"), default="bottom")
-    identifier = config_options.Type(str, default="_{identifier}-{index}")
-    reference_text = config_options.Type(str, default="{identifier} {index}")
-    caption_prefix = config_options.Type(str, default="{identifier} {index}:")
+    default_id = config_options.Type(str, default="_{identifier}-{index}")
+    reference_text = config_options.Type(str, default="{Identifier} {index}")
+    caption_prefix = config_options.Type(str, default="{Identifier} {index}:")
+    markdown_identifier = config_options.Type(str, default="{Identifier}:")
+
+    @staticmethod
+    def _format_string(
+        input_str: str,
+        identifier: str,
+        index: int | None = None,
+    ) -> str:
+        """Format a string with the given identifier and index.
+
+        Args:
+            input_str: The input string to format.
+            identifier: The identifier to use.
+            index: The index to use.
+
+        Returns:
+            The formatted string.
+        """
+        return input_str.format(
+            Identifier=identifier.capitalize(),
+            identifier=identifier.lower(),
+            index=index,
+        )
+
+    def get_markdown_identifier(self, identifier: str) -> str:
+        """Get the markdown identifier for the given identifier.
+
+        Args:
+            identifier: The identifier to use.
+
+        Returns:
+            The formatted markdown identifier.
+        """
+        return self._format_string(self.markdown_identifier, identifier)
+
+    def get_caption_prefix(self, identifier: str, index: int) -> str:
+        """Get the caption prefix for the given identifier and index.
+
+        Args:
+            identifier: The identifier to use.
+            index: The index to use.
+
+        Returns:
+            The formatted caption prefix.
+        """
+        return self._format_string(self.caption_prefix, identifier, index=index)
+
+    def get_reference_text(self, identifier: str, index: int) -> str:
+        """Get the reference text for the given identifier and index.
+
+        Args:
+            identifier: The identifier to use.
+            index: The index to use.
+
+        Returns:
+            The formatted reference text.
+        """
+        return self._format_string(self.reference_text, identifier, index=index)
+
+    def get_default_id(self, identifier: str, index: int) -> str:
+        """Get the default id for the given identifier and index.
+
+        Args:
+            identifier: The identifier to use.
+            index: The index to use.
+
+        Returns:
+            The formatted default id.
+        """
+        return self._format_string(self.default_id, identifier, index=index)
 
 
 class CaptionConfig(base.Config):
