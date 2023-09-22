@@ -1,7 +1,7 @@
 """Handle table related captioning."""
 from __future__ import annotations
 
-import typing as t
+from typing import TYPE_CHECKING
 
 from lxml import etree
 
@@ -12,7 +12,7 @@ from mkdocs_caption.helper import (
     wrap_md_captions,
 )
 
-if t.TYPE_CHECKING:
+if TYPE_CHECKING:
     from mkdocs_caption.config import IdentifierCaption
     from mkdocs_caption.logger import PluginLogger
 
@@ -86,12 +86,16 @@ def _add_caption_to_table(
     caption_prefix = config.get_caption_prefix(index=index, identifier="table")
     caption_text = sanitize_caption(caption_element.text)
     try:
+        additional_styles = ""
+        if config.position == "bottom":
+            additional_styles = ' style="caption-side:bottom"'
         table_caption_element = etree.fromstring(
-            f"<caption>{caption_prefix} {caption_text}</caption>",
+            f"<caption{additional_styles}>{caption_prefix} {caption_text}</caption>",
         )
     except etree.XMLSyntaxError:
         logger.error(
-            "Invalid XML in caption: <caption>%s %s</caption>",
+            "Invalid XML in caption: <caption%s>%s %s</caption>",
+            additional_styles,
             caption_prefix,
             caption_text,
         )
@@ -134,8 +138,6 @@ def postprocess_html(
         return
     index = config.start_index
     for table_caption in tree.xpath(f"//{TABLE_CAPTION_TAG}"):
-        # unused attribute identifier
-        table_caption.attrib.pop("identifier")
         a_wrapper = table_caption.getparent()
         target_element = a_wrapper.getnext()
         if target_element.tag != "table":
@@ -144,6 +146,9 @@ def postprocess_html(
                 table_caption.text,
             )
             continue
+        # unused attribute identifier
+        table_caption.attrib.pop("identifier")
+
         _add_caption_to_table(
             target_element,
             tree=tree,

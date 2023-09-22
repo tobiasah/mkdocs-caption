@@ -10,6 +10,7 @@ _version.py
 .mypy_cache
 ## Pytest
 .pytest_cache
+.coverage
 ## Ruff
 .ruff_cache
 

@@ -14,9 +14,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
 keywords = []
-authors = [
-  { name = "Tobias Ahrens", email = "tobias.ahrens@posteo.de" },
-]
+authors = [{ name = "Tobias Ahrens", email = "tobias.ahrens@posteo.de" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
@@ -44,31 +42,25 @@ source = "vcs"
 version-file = "src/mkdocs_caption/_version.py"
 
 [tool.hatch.build.targets.sdist]
-exclude = [
-  "/.github",
-  "/docs",
-]
+exclude = ["/.github", "/docs"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mkdocs_caption"]
 
 [tool.hatch.envs.default]
-dependencies = [
-  "coverage[toml]>=6.5",
-  "pytest",
-  "lxml",
-]
-[tool.hatch.envs.default.scripts]
+dependencies = ["coverage[toml]>=6.5", "pytest", "lxml"]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11"]
+
+[tool.hatch.envs.test]
+dependencies = ["coverage[toml]>=6.5", "pytest", "pymdown-extensions"]
+
+[tool.hatch.envs.test.scripts]
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
-cov-report = [
-  "- coverage combine",
-  "coverage report",
-]
-cov = [
-  "test-cov",
-  "cov-report",
-]
+cov-report = ["- coverage combine", "coverage report", "coverage html"]
+cov = ["test-cov", "cov-report"]
 
 [[tool.hatch.envs.lint.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11"]
@@ -80,23 +72,13 @@ dependencies = [
   "mypy>=1.0.0",
   "ruff>=0.0.243",
   "types-lxml>=2023.3.28",
-  "mkdocs"
+  "mkdocs",
 ]
 [tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src/mkdocs_caption tests}"
-style = [
-  "ruff {args:.}",
-  "black --check --diff {args:.}",
-]
-fmt = [
-  "black {args:.}",
-  "ruff --fix {args:.}",
-  "style",
-]
-all = [
-  "style",
-  "typing",
-]
+typing = "mypy --install-types --non-interactive {args:src/mkdocs_caption}"
+style = ["ruff {args:.}", "black --check --diff {args:.}"]
+fmt = ["black {args:.}", "ruff --fix {args:.}", "style"]
+all = ["style", "typing"]
 
 [tool.black]
 target-version = ["py38"]
@@ -130,26 +112,27 @@ ban-relative-imports = "all"
 
 [tool.ruff.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
-"tests/**/*" = ["PLR2004", "S101", "TID252"]
+"tests/**/*" = [
+  "PLR2004",
+  "S101",
+  "TID252",
+  "D103",
+  "ANN001",
+  "ANN201",
+  "ANN002",
+]
 
 [tool.coverage.run]
-source_pkgs = ["mkdocs_caption", "tests"]
+source_pkgs = ["mkdocs_caption"]
 branch = true
 parallel = true
-omit = [
-  "src/mkdocs_caption/__about__.py",
-]
+omit = ["src/mkdocs_caption/__about__.py"]
 
 [tool.coverage.paths]
 mkdocs_caption = ["src/mkdocs_caption", "*/mkdocs_caption/src/mkdocs_caption"]
-tests = ["tests", "*/mkdocs_caption/tests"]
 
 [tool.coverage.report]
-exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [[tool.mypy.overrides]]
 module = "lxml"

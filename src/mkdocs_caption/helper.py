@@ -71,8 +71,10 @@ def _escape_md_caption(match: re.Match, *, target_tag: str) -> str:
     identifier = match.group(1).rstrip(":")
     caption = match.group(2)
     options = _parse_extended_markdown(match.group(4))
-    return f'<{target_tag} identifier="{identifier}" \
-        {options}>{caption}</{target_tag}>\n\n'
+    return str(
+        f'<{target_tag} identifier="{identifier}"'
+        f"{options}>{caption}</{target_tag}>\n\n",
+    )
 
 
 def wrap_md_captions(markdown: str, *, identifier: str, html_tag: str) -> str:

@@ -1,0 +1,10 @@
+site_name: MkDocs Captions Demo
+
+markdown_extensions:
+  pymdownx.extra: {}
+
+plugins:
+  caption:
+    additional_identifier: ["List", "Code"]
+    custom:
+      enable: true

@@ -1,13 +1,13 @@
 """Custom caption handling."""
 from __future__ import annotations
 
-import typing as t
+from typing import TYPE_CHECKING
 
 from lxml import etree
 
 from mkdocs_caption.helper import TreeElement, update_references, wrap_md_captions
 
-if t.TYPE_CHECKING:
+if TYPE_CHECKING:
     from mkdocs_caption.config import IdentifierCaption
     from mkdocs_caption.logger import PluginLogger
 
@@ -68,10 +68,7 @@ def _wrap_in_figure(
         config: The plugin configuration.
         logger: Current plugin logger.
     """
-    a_wrapper = caption_element.getparent()
-    if a_wrapper is None:
-        logger.error("Custom caption is not wrapped in a link")
-        return
+    a_wrapper: TreeElement = caption_element.getparent()  # type: ignore[assignment]
     target_element = a_wrapper.getnext()
     if target_element is None:
         logger.error("Custom caption does not semm to have a element that follows it")
@@ -81,7 +78,6 @@ def _wrap_in_figure(
     figure_element.attrib.update(caption_element.attrib)
     # wrap target element
     target_element.addprevious(figure_element)
-    figure_element.insert(0, target_element)
 
     # add caption
     caption_prefix = config.get_caption_prefix(identifier=identifier, index=index)
@@ -92,7 +88,12 @@ def _wrap_in_figure(
     except etree.XMLSyntaxError:
         logger.error("Invalid XML in caption: %s", caption_element.text)
         return
-    figure_element.append(fig_caption_element)
+    if config.position == "top":
+        figure_element.append(fig_caption_element)
+        figure_element.append(target_element)
+    else:
+        figure_element.append(target_element)
+        figure_element.append(fig_caption_element)
 
     figure_id = caption_element.attrib.get(
         "id",
@@ -105,9 +106,7 @@ def _wrap_in_figure(
         config.get_reference_text(identifier=identifier, index=index),
     )
     a_wrapper.remove(caption_element)
-    parent = a_wrapper.getparent()
-    if parent is not None:
-        parent.remove(a_wrapper)
+    a_wrapper.getparent().remove(a_wrapper)  # type: ignore[union-attr]
 
 
 def postprocess_html(
@@ -131,8 +130,8 @@ def postprocess_html(
     index_dict: dict[str, int] = {}
     for custom_caption in tree.xpath(f"//{CAPTION_TAG}"):
         identifier = custom_caption.attrib.pop("identifier")
-        index = index_dict.get(identifier, 1)
-        index_dict[identifier] = index + 1
+        index = index_dict.get(identifier, config.start_index)
+        index_dict[identifier] = index + config.increment_index
         _wrap_in_figure(
             custom_caption,
             tree=tree,

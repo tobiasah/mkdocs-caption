@@ -155,11 +155,14 @@ def postprocess_html(
     # Handle additional figure caption elements
     custom_figure_attrib = {}
     for custom_caption in tree.xpath(f"//{IMG_CAPTION_TAG}"):
-        # unused attribute identifier
-        custom_caption.attrib.pop("identifier")
         a_wrapper = custom_caption.getparent()
         try:
-            target_element = a_wrapper.getnext().xpath("//img")[0]
+            next_element = a_wrapper.getnext()
+            target_element = (
+                next_element
+                if next_element.tag == "img"
+                else next_element.xpath(".//img")[0]
+            )
         except IndexError:
             logger.error(
                 "Figure caption must be followed by a img element. Skipping: %s",
@@ -167,7 +170,11 @@ def postprocess_html(
             )
             continue
         target_element.attrib["title"] = custom_caption.text
+        # unused attribute identifier
+        custom_caption.attrib.pop("identifier")
         custom_figure_attrib[target_element] = custom_caption.attrib
+        a_wrapper.remove(custom_caption)
+        a_wrapper.getparent().remove(a_wrapper)
     # Iterate through all images and wrap them in a figure element if requested
     index = config.start_index
     for img_element in tree.xpath("//p/a/img|//p/img"):

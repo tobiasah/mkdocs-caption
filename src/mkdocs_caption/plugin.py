@@ -82,14 +82,10 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
                 e,
             )
         try:
-            identifiers = [
-                self._config.custom.get_markdown_identifier(x)
-                for x in config.additional_identifier
-            ]
             markdown = custom.preprocess_markdown(
                 markdown,
                 config=self._config.custom,
-                identifiers=identifiers,
+                identifiers=config.additional_identifier,
             )
         except Exception as e:  # noqa: BLE001
             logger.error(
