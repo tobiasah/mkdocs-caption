@@ -1,0 +1,84 @@
+site_name: MkDocs Caption
+site_url: https://tobiasah.github.io/mkdocs-caption/
+
+theme:
+  name: material
+  palette:
+  - media: "(prefers-color-scheme)"
+    toggle:
+      icon: material/brightness-auto
+      name: Switch to light mode
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    toggle:
+      icon: material/brightness-7
+      name: Switch to dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    toggle:
+      icon: material/brightness-4
+      name: Switch to system preference
+  features:
+  - content.tabs.link # Link tabs across hole documentation
+  - navigation.indexes # index.md are rendered directly in the index
+  - navigation.top # Back-to-top button
+  - content.code.copy # Enable code copy button by default
+  - content.code.annotate # Enable code annotation by default
+  - navigation.footer # Enable next and previous navigation in footer
+  - search.suggest # Search displays the likeliest completion
+  - search.highlight # Highlight search results
+  - navigation.path # breadcrumb navigation
+
+nav:
+- Home: "index.md"
+- quick_start.md
+- config.md
+- Images: "image.md"
+- Tables: "table.md"
+- Custom: "custom.md"
+- Referencing: "references.md"
+
+###############################################################################
+#### Markdown extensions
+###############################################################################
+markdown_extensions:
+  admonition: {}
+  attr_list: {}
+  md_in_html: {}
+  pymdownx.details: {}
+  pymdownx.emoji:
+    emoji_index: !!python/name:materialx.emoji.twemoji
+    emoji_generator: !!python/name:materialx.emoji.to_svg
+  pymdownx.extra: {}
+  pymdownx.highlight:
+    use_pygments: true
+    linenums: true
+    linenums_style: pymdownx-inline
+  pymdownx.inlinehilite: {}
+  pymdownx.tabbed:
+    alternate_style: true
+  pymdownx.snippets: {}
+  pymdownx.superfences:
+    custom_fences:
+      - name: mermaid
+      - class: mermaid
+      - format: !!python/name:pymdownx.superfences.fence_code_format
+  pymdownx.keys: {}
+  toc:
+    permalink: true
+
+###############################################################################
+#### MKDocs plugin
+###############################################################################
+plugins:
+  search:
+    separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  literate-nav: {} # Alternative navigation support, e.g. wildcards (mkdocs-literate-nav)
+  spellcheck:
+    backends:
+    - codespell:
+        dictionaries: ["clear", "rare"]
+    ignore_code: yes
+    min_length: 3
+  caption:
+    additional_identifier: [List, Example]
