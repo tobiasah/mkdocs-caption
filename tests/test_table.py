@@ -10,12 +10,12 @@ def test_preprocess_disabled():
     config = IdentifierCaption()
     config.enable = False
     markdown = """\
-    This is a test
-    hkjbnk
+This is a test
+hkjbnk
 
-    Table: My Caption
+Table: My Caption
 
-    hjkhjk
+hjkhjk
     """
     assert table.preprocess_markdown(markdown, config=config) == markdown
 
@@ -23,10 +23,9 @@ def test_preprocess_disabled():
 def test_preprocess_no_identifier():
     config = IdentifierCaption()
     markdown = """\
-
-    This is a test
-    hkjbnk
-    hjkhjk
+This is a test
+hkjbnk
+hjkhjk
     """
     assert table.preprocess_markdown(markdown, config=config) == markdown
 
@@ -34,11 +33,10 @@ def test_preprocess_no_identifier():
 def test_preprocess_default_identifier_inline():
     config = IdentifierCaption()
     markdown = """\
-
-    This is a test
-    hkjbnk
-    Table: My Caption
-    hjkhjk
+This is a test
+hkjbnk
+Table: My Caption
+hjkhjk
     """
     assert table.preprocess_markdown(markdown, config=config) == markdown
 
@@ -46,13 +44,12 @@ def test_preprocess_default_identifier_inline():
 def test_preprocess_default_identifier():
     config = IdentifierCaption()
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+Table: My Caption
 
-    Table: My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = table.preprocess_markdown(markdown, config=config)
     assert '<table-caption identifier="Table">My Caption</table-caption>' in result
@@ -61,13 +58,12 @@ def test_preprocess_default_identifier():
 def test_preprocess_options_ok():
     config = IdentifierCaption()
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+Table: My Caption {#myid .myclass tester="test"}
 
-    Table: My Caption {#myid .myclass tester="test"}
-
-    hjkhjk
+hjkhjk
     """
     result = table.preprocess_markdown(markdown, config=config)
     assert "id=myid" in result
@@ -79,13 +75,12 @@ def test_preprocess_custom_identifier():
     config = IdentifierCaption()
     config.markdown_identifier = "Custom&"
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+Custom& My Caption
 
-    Custom& My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = table.preprocess_markdown(markdown, config=config)
     assert '<table-caption identifier="Custom&">My Caption</table-caption>' in result
@@ -95,13 +90,12 @@ def test_preprocess_custom_ignores_default_identifier():
     config = IdentifierCaption()
     config.markdown_identifier = "Custom&"
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+Table: My Caption
 
-    Table: My Caption
-
-    hjkhjk
+hjkhjk
     """
     assert table.preprocess_markdown(markdown, config=config) == markdown
 
@@ -109,16 +103,15 @@ def test_preprocess_custom_ignores_default_identifier():
 def test_preprocess_multiple():
     config = IdentifierCaption()
     markdown = """\
+This is a test
 
-    This is a test
+Table: First
 
-    Table: First
+hkjbnk
 
-    hkjbnk
+Table: My Caption
 
-    Table: My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = table.preprocess_markdown(markdown, config=config)
     assert '<table-caption identifier="Table">My Caption</table-caption>' in result
@@ -215,7 +208,7 @@ def test_postprocess_position():
     tree = etree.fromstring(html)
     table.postprocess_html(tree=tree, config=config, logger=None)
     result = etree.tostring(tree, encoding="unicode", method="html")
-    assert "<caption>Table 1: My Caption</caption>" in result
+    assert '<caption style="caption-side:top">Table 1: My Caption</caption>' in result
 
     config.position = "bottom"
     tree = etree.fromstring(html)

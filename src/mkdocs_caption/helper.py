@@ -69,10 +69,10 @@ def _escape_md_caption(match: re.Match, *, target_tag: str) -> str:
         A string with the custom caption escaped using a custom HTML tag.
     """
     identifier = match.group(1).rstrip(":")
-    caption = match.group(2)
+    caption = match.group(2).replace("\n", " ")
     options = _parse_extended_markdown(match.group(4))
     return str(
-        f'<{target_tag} identifier="{identifier}"'
+        f'\n<{target_tag} identifier="{identifier}"'
         f"{options}>{caption}</{target_tag}>\n\n",
     )
 
@@ -92,7 +92,7 @@ def wrap_md_captions(markdown: str, *, identifier: str, html_tag: str) -> str:
         markdown string with custom captions wrapped
     """
     return re.sub(
-        rf"({identifier}) (.*?)({{(.*?)}})?\n\n",
+        rf"^({identifier}) (.*?)({{(.*?)}})?\n\n",
         lambda match: _escape_md_caption(match, target_tag=html_tag),
         markdown,
         flags=re.MULTILINE | re.DOTALL,

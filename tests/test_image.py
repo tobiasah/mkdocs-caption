@@ -11,12 +11,12 @@ def test_preprocess_disabled():
     config = IdentifierCaption()
     config.enable = False
     markdown = """\
-    This is a test
-    hkjbnk
+This is a test
+hkjbnk
 
-    Figure: My Caption
+Figure: My Caption
 
-    hjkhjk
+hjkhjk
     """
     assert image.preprocess_markdown(markdown, config=config) == markdown
 
@@ -25,8 +25,21 @@ def test_preprocess_no_identifier():
     config = IdentifierCaption()
     markdown = """\
 
+This is a test
+hkjbnk
+hjkhjk
+    """
+    assert image.preprocess_markdown(markdown, config=config) == markdown
+
+
+def test_preprocess_intended():
+    config = IdentifierCaption()
+    markdown = """\
     This is a test
     hkjbnk
+
+    Figure: My Caption
+
     hjkhjk
     """
     assert image.preprocess_markdown(markdown, config=config) == markdown
@@ -35,11 +48,10 @@ def test_preprocess_no_identifier():
 def test_preprocess_default_identifier_inline():
     config = IdentifierCaption()
     markdown = """\
-
-    This is a test
-    hkjbnk
-    Figure: My Caption
-    hjkhjk
+This is a test
+hkjbnk
+Figure: My Caption
+hjkhjk
     """
     assert image.preprocess_markdown(markdown, config=config) == markdown
 
@@ -47,13 +59,12 @@ def test_preprocess_default_identifier_inline():
 def test_preprocess_default_identifier():
     config = IdentifierCaption()
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+Figure: My Caption
 
-    Figure: My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = image.preprocess_markdown(markdown, config=config)
     assert '<figure-caption identifier="Figure">My Caption</figure-caption>' in result
@@ -62,13 +73,12 @@ def test_preprocess_default_identifier():
 def test_preprocess_options_ok():
     config = IdentifierCaption()
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+Figure: My Caption {#myid .myclass tester="test"}
 
-    Figure: My Caption {#myid .myclass tester="test"}
-
-    hjkhjk
+hjkhjk
     """
     result = image.preprocess_markdown(markdown, config=config)
     assert "id=myid" in result
@@ -80,13 +90,12 @@ def test_preprocess_custom_identifier():
     config = IdentifierCaption()
     config.markdown_identifier = "Custom&"
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+Custom& My Caption
 
-    Custom& My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = image.preprocess_markdown(markdown, config=config)
     assert '<figure-caption identifier="Custom&">My Caption</figure-caption>' in result
@@ -97,12 +106,12 @@ def test_preprocess_custom_ignores_default_identifier():
     config.markdown_identifier = "Custom&"
     markdown = """\
 
-    This is a test
-    hkjbnk
+This is a test
+hkjbnk
 
-    Figure: My Caption
+Figure: My Caption
 
-    hjkhjk
+hjkhjk
     """
     assert image.preprocess_markdown(markdown, config=config) == markdown
 
@@ -110,16 +119,15 @@ def test_preprocess_custom_ignores_default_identifier():
 def test_preprocess_multiple():
     config = IdentifierCaption()
     markdown = """\
+This is a test
 
-    This is a test
+Figure: First
 
-    Figure: First
+hkjbnk
 
-    hkjbnk
+Figure: My Caption
 
-    Figure: My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = image.preprocess_markdown(markdown, config=config)
     assert '<figure-caption identifier="Figure">My Caption</figure-caption>' in result

@@ -12,6 +12,11 @@ Figure: This uses a Figure identifier as caption {.my_class #my_id}
 
 ![](assets/demo.png){width="200"}
 
+Figure: This uses a Figure identifier as caption
+and it goes on for multiple lines
+
+![](assets/demo.png){width="200"}
+
 ## Tables
 
 Table: Table caption

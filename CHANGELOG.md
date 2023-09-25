@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 0.0.9
+
+* Fixed problem of leaking the figure caption element into the resulting HTML.
+* Allow specifying the position of the caption for tables.
+* Allow specifying the position of the caption for custom captions.
+* Fix bug where the caption identifier was picked up even if it was not 
+  the first word in the line.
+* Allow multiline captions
+
 ## Version 0.0.8
 
 * Introduce the `Figure` identifier to allow the same kind of syntax for images and tables.

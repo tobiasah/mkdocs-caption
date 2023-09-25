@@ -10,13 +10,12 @@ def test_preprocess_disabled():
     config = IdentifierCaption()
     config.enable = False
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+List: My Caption
 
-    List: My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = custom.preprocess_markdown(markdown, config=config, identifiers=["List"])
     assert result == markdown
@@ -25,9 +24,9 @@ def test_preprocess_disabled():
 def test_preprocess_no_identifier():
     config = IdentifierCaption()
     markdown = """\
-    This is a test
-    hkjbnk
-    hjkhjk
+This is a test
+hkjbnk
+hjkhjk
     """
     result = custom.preprocess_markdown(markdown, config=config, identifiers=["List"])
     assert result == markdown
@@ -36,10 +35,10 @@ def test_preprocess_no_identifier():
 def test_preprocess_default_identifier_inline():
     config = IdentifierCaption()
     markdown = """\
-    This is a test
-    hkjbnk
-    List: My Caption
-    hjkhjk
+This is a test
+hkjbnk
+List: My Caption
+hjkhjk
     """
     result = custom.preprocess_markdown(markdown, config=config, identifiers=["List"])
     assert result == markdown
@@ -48,13 +47,12 @@ def test_preprocess_default_identifier_inline():
 def test_preprocess_default_identifier():
     config = IdentifierCaption()
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+List: My Caption
 
-    List: My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = custom.preprocess_markdown(markdown, config=config, identifiers=["List"])
     assert '<custom-caption identifier="List">My Caption</custom-caption>' in result
@@ -63,12 +61,12 @@ def test_preprocess_default_identifier():
 def test_preprocess_options_ok():
     config = IdentifierCaption()
     markdown = """\
-    This is a test
-    hkjbnk
+This is a test
+hkjbnk
 
-    List: My Caption {#myid .myclass tester="test"}
+List: My Caption {#myid .myclass tester="test"}
 
-    hjkhjk
+hjkhjk
     """
     result = custom.preprocess_markdown(markdown, config=config, identifiers=["List"])
     assert "id=myid" in result
@@ -80,13 +78,12 @@ def test_preprocess_custom_identifier():
     config = IdentifierCaption()
     config.markdown_identifier = "Custom&"
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+Custom& My Caption
 
-    Custom& My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = custom.preprocess_markdown(markdown, config=config, identifiers=["List"])
     assert '<custom-caption identifier="Custom&">My Caption</custom-caption>' in result
@@ -96,13 +93,12 @@ def test_preprocess_custom_ignores_default_identifier():
     config = IdentifierCaption()
     config.markdown_identifier = "Custom&"
     markdown = """\
+This is a test
+hkjbnk
 
-    This is a test
-    hkjbnk
+List: My Caption
 
-    List: My Caption
-
-    hjkhjk
+hjkhjk
     """
     assert (
         custom.preprocess_markdown(markdown, config=config, identifiers=["List"])
@@ -113,16 +109,15 @@ def test_preprocess_custom_ignores_default_identifier():
 def test_preprocess_multiple():
     config = IdentifierCaption()
     markdown = """\
+This is a test
 
-    This is a test
+List: First
 
-    List: First
+hkjbnk
 
-    hkjbnk
+List: My Caption
 
-    List: My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = custom.preprocess_markdown(markdown, config=config, identifiers=["List"])
     assert '<custom-caption identifier="List">My Caption</custom-caption>' in result
@@ -132,16 +127,15 @@ def test_preprocess_multiple():
 def test_preprocess_multiple_indentifier():
     config = IdentifierCaption()
     markdown = """\
+This is a test
 
-    This is a test
+List: First
 
-    List: First
+hkjbnk
 
-    hkjbnk
+Equation: My Caption
 
-    Equation: My Caption
-
-    hjkhjk
+hjkhjk
     """
     result = custom.preprocess_markdown(
         markdown,
