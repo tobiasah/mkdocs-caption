@@ -30,7 +30,12 @@ def preprocess_markdown(markdown: str, *, config: IdentifierCaption) -> str:
     if not config.enable:
         return markdown
     identifier = config.get_markdown_identifier("figure")
-    return wrap_md_captions(markdown, identifier=identifier, html_tag=IMG_CAPTION_TAG)
+    return wrap_md_captions(
+        markdown,
+        identifier=identifier,
+        html_tag=IMG_CAPTION_TAG,
+        allow_indented_caption=config.allow_indented_caption,
+    )
 
 
 def wrap_image(

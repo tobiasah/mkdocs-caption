@@ -1,7 +1,13 @@
 site_name: MkDocs Captions Demo
 
+theme:
+  name: material
+
 markdown_extensions:
-  pymdownx.extra: {}
+  - pymdownx.extra: {}
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
 
 plugins:
   caption:

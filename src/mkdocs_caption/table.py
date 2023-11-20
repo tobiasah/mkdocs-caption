@@ -35,7 +35,12 @@ def preprocess_markdown(markdown: str, *, config: IdentifierCaption) -> str:
     if not config.enable:
         return markdown
     identifier = config.get_markdown_identifier("table")
-    return wrap_md_captions(markdown, identifier=identifier, html_tag=TABLE_CAPTION_TAG)
+    return wrap_md_captions(
+        markdown,
+        identifier=identifier,
+        html_tag=TABLE_CAPTION_TAG,
+        allow_indented_caption=config.allow_indented_caption,
+    )
 
 
 def _create_colgroups(coldef: str) -> TreeElement:

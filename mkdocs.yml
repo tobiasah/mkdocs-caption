@@ -82,3 +82,9 @@ plugins:
     min_length: 3
   caption:
     additional_identifier: [List, Example]
+    figure:
+      allow_indented_caption: false
+    table:
+      allow_indented_caption: false
+    custom:
+      allow_indented_caption: false
