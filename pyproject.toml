@@ -54,7 +54,7 @@ dependencies = ["coverage[toml]>=6.5", "pytest", "lxml"]
 python = ["3.8", "3.9", "3.10", "3.11"]
 
 [tool.hatch.envs.test]
-dependencies = ["coverage[toml]>=6.5", "pytest", "pymdown-extensions"]
+dependencies = ["coverage[toml]>=6.5", "pytest", "pymdown-extensions",  "mkdocs-material"]
 
 [tool.hatch.envs.test.scripts]
 test = "pytest {args:tests}"

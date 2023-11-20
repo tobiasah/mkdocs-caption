@@ -18,6 +18,7 @@ plugins:
       reference_text: 'Table {index}'
       caption_prefix: 'Table {index}:'
       markdown_identifier: 'Table:'
+      allow_indented_caption: True
     figure: # (3)!
       enable: true
       start_index: 1
@@ -27,6 +28,7 @@ plugins:
       reference_text: 'Figure {index}'
       caption_prefix: 'Figure {index}:'
       markdown_identifier: 'Figure:'
+      allow_indented_caption: True
     custom: # (4)!
       enable: true
       start_index: 1
@@ -36,6 +38,7 @@ plugins:
       reference_text: '{Identifier} {index}'
       caption_prefix: '{Identifier} {index}:'
       markdown_identifier: '{Identifier}:'
+      allow_indented_caption: True
 ```
 
 1.  list of additional identifiers (e.g. [`List`, `Example`]. These identifiers will be treated as
@@ -68,6 +71,7 @@ The following table lists all available options.
 | reference_text | The text used for references to this element. Note, this only will be applied if the anchor does not specify its own link text |
 | caption_prefix | The prefix put before of the caption text |
 | markdown_identifier | The identifier that this plugin will search for in the markdown. (Note that every match of this identifier will be treated as a caption element. A false match will most likely result in an error) |
+| allow_indented_caption | Flag if caption elements should also be parsed within indented blocks. By default this is enabled. |
 
 ## Overwriting the default configuration
 

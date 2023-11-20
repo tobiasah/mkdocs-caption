@@ -1,6 +1,7 @@
 """Test the plugin with a MkDocs demo site."""
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock
 
 from mkdocs import config
 from mkdocs.commands import build
@@ -19,4 +20,5 @@ def test_demo(caplog):
 
 
 if __name__ == "__main__":
-    test_demo()
+    log = MagicMock()
+    test_demo(log)

@@ -68,16 +68,23 @@ def _escape_md_caption(match: re.Match, *, target_tag: str) -> str:
     Returns:
         A string with the custom caption escaped using a custom HTML tag.
     """
-    identifier = match.group(1).rstrip(":")
-    caption = match.group(2).replace("\n", " ")
-    options = _parse_extended_markdown(match.group(4))
+    prefix = match.group(1)
+    identifier = match.group(2).rstrip(":")
+    caption = match.group(3).replace("\n", " ")
+    options = _parse_extended_markdown(match.group(5))
     return str(
-        f'\n<{target_tag} identifier="{identifier}"'
+        f'\n{prefix}<{target_tag} identifier="{identifier}"'
         f"{options}>{caption}</{target_tag}>\n\n",
     )
 
 
-def wrap_md_captions(markdown: str, *, identifier: str, html_tag: str) -> str:
+def wrap_md_captions(
+    markdown: str,
+    *,
+    identifier: str,
+    html_tag: str,
+    allow_indented_caption: bool,
+) -> str:
     """Preprocess markdown to wrap custom captions.
 
     The custom captions are wrapped in a custom html
@@ -87,12 +94,14 @@ def wrap_md_captions(markdown: str, *, identifier: str, html_tag: str) -> str:
         markdown: markdown string
         identifier: identifier to wrap
         html_tag: html tag to wrap the caption in
+        allow_indented_caption: Flag if indented captions are allowed
 
     Returns:
         markdown string with custom captions wrapped
     """
+    prefix = r"([^\S\r\n]*?)" if allow_indented_caption else "^()"
     return re.sub(
-        rf"^({identifier}) (.*?)({{(.*?)}})?\n\n",
+        rf"{prefix}({identifier}) (.*?)({{(.*?)}})?\n\n",
         lambda match: _escape_md_caption(match, target_tag=html_tag),
         markdown,
         flags=re.MULTILINE | re.DOTALL,

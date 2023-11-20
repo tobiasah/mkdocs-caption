@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.0.10
+
+* Allow caption elements within indented blocks (e.g. admonitions). Can be disabled
+  with the `allow_indented_caption` option.
+
 ## Version 0.0.9
 
 * Fixed problem of leaking the figure caption element into the resulting HTML.

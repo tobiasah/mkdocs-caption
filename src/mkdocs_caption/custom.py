@@ -41,6 +41,7 @@ def preprocess_markdown(
             markdown,
             identifier=md_identifier,
             html_tag=CAPTION_TAG,
+            allow_indented_caption=config.allow_indented_caption,
         )
     return markdown
 

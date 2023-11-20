@@ -17,6 +17,14 @@ and it goes on for multiple lines
 
 ![](assets/demo.png){width="200"}
 
+
+!!! warning
+
+    Figure: This uses a Figure identifier as caption and
+    it goes on for multiple lines
+
+    ![](assets/demo.png){width="200"}
+
 ## Tables
 
 Table: Table caption

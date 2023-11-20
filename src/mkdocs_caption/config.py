@@ -27,6 +27,7 @@ class IdentifierCaption(base.Config):
     reference_text = config_options.Type(str, default="{Identifier} {index}")
     caption_prefix = config_options.Type(str, default="{Identifier} {index}:")
     markdown_identifier = config_options.Type(str, default="{Identifier}:")
+    allow_indented_caption = config_options.Type(bool, default=True)
 
     @staticmethod
     def _format_string(

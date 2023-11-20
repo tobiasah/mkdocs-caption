@@ -42,6 +42,23 @@ def test_preprocess_intended():
 
     hjkhjk
     """
+    result = image.preprocess_markdown(markdown, config=config)
+    assert (
+        '    <figure-caption identifier="Figure">My Caption</figure-caption>' in result
+    )
+
+
+def test_preprocess_intended_disabled():
+    config = IdentifierCaption()
+    config.allow_indented_caption = False
+    markdown = """\
+    This is a test
+    hkjbnk
+
+    Figure: My Caption
+
+    hjkhjk
+    """
     assert image.preprocess_markdown(markdown, config=config) == markdown
 
 
@@ -68,6 +85,22 @@ hjkhjk
     """
     result = image.preprocess_markdown(markdown, config=config)
     assert '<figure-caption identifier="Figure">My Caption</figure-caption>' in result
+
+
+def test_preprocess_default_identifier_indent():
+    config = IdentifierCaption()
+    markdown = """\
+This is a test
+hkjbnk
+
+    Figure: My Caption
+
+hjkhjk
+    """
+    result = image.preprocess_markdown(markdown, config=config)
+    assert (
+        '    <figure-caption identifier="Figure">My Caption</figure-caption>' in result
+    )
 
 
 def test_preprocess_options_ok():
