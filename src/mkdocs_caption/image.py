@@ -8,13 +8,13 @@ from lxml import etree
 from mkdocs_caption.helper import TreeElement, update_references, wrap_md_captions
 
 if TYPE_CHECKING:
-    from mkdocs_caption.config import IdentifierCaption
+    from mkdocs_caption.config import FigureCaption
     from mkdocs_caption.logger import PluginLogger
 
 IMG_CAPTION_TAG = "figure-caption"
 
 
-def preprocess_markdown(markdown: str, *, config: IdentifierCaption) -> str:
+def preprocess_markdown(markdown: str, *, config: FigureCaption) -> str:
     """Preprocess markdown to wrap image captions.
 
     The image captions are wrapped in a custom html
@@ -77,7 +77,7 @@ def postprocess_image(
     img_element: TreeElement,
     title: str,
     tree: TreeElement,
-    config: IdentifierCaption,
+    config: FigureCaption,
     logger: PluginLogger,
     index: int,
     figure_attrib: dict[str, str] | None,
@@ -139,7 +139,7 @@ def postprocess_image(
 def postprocess_html(
     *,
     tree: TreeElement,
-    config: IdentifierCaption,
+    config: FigureCaption,
     logger: PluginLogger,
 ) -> None:
     """Postprocess an XML tree to handle custom image captions.
@@ -185,9 +185,12 @@ def postprocess_html(
     for img_element in tree.xpath("//p/a/img|//p/img"):
         figure_attrib = custom_figure_attrib.get(img_element, {})
         # We pop the title here so its not duplicated in the img element
-        title = img_element.attrib.pop("title", img_element.get("alt", None))
-        if not title:
-            continue
+        title = img_element.attrib.pop("title", None)
+        if title is None:
+            # Use the alt text if provided
+            title = img_element.get("alt", None)
+            if config.ignore_alt or not title or img_element.tail is not None:
+                continue
         postprocess_image(
             img_element=img_element,
             title=title,

@@ -3,12 +3,12 @@
 from lxml import etree
 
 from mkdocs_caption import image
-from mkdocs_caption.config import IdentifierCaption
+from mkdocs_caption.config import FigureCaption
 from mkdocs_caption.logger import get_logger
 
 
 def test_preprocess_disabled():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.enable = False
     markdown = """\
 This is a test
@@ -22,7 +22,7 @@ hjkhjk
 
 
 def test_preprocess_no_identifier():
-    config = IdentifierCaption()
+    config = FigureCaption()
     markdown = """\
 
 This is a test
@@ -33,7 +33,7 @@ hjkhjk
 
 
 def test_preprocess_intended():
-    config = IdentifierCaption()
+    config = FigureCaption()
     markdown = """\
     This is a test
     hkjbnk
@@ -49,7 +49,7 @@ def test_preprocess_intended():
 
 
 def test_preprocess_intended_disabled():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.allow_indented_caption = False
     markdown = """\
     This is a test
@@ -63,7 +63,7 @@ def test_preprocess_intended_disabled():
 
 
 def test_preprocess_default_identifier_inline():
-    config = IdentifierCaption()
+    config = FigureCaption()
     markdown = """\
 This is a test
 hkjbnk
@@ -74,7 +74,7 @@ hjkhjk
 
 
 def test_preprocess_default_identifier():
-    config = IdentifierCaption()
+    config = FigureCaption()
     markdown = """\
 This is a test
 hkjbnk
@@ -88,7 +88,7 @@ hjkhjk
 
 
 def test_preprocess_default_identifier_indent():
-    config = IdentifierCaption()
+    config = FigureCaption()
     markdown = """\
 This is a test
 hkjbnk
@@ -104,7 +104,7 @@ hjkhjk
 
 
 def test_preprocess_options_ok():
-    config = IdentifierCaption()
+    config = FigureCaption()
     markdown = """\
 This is a test
 hkjbnk
@@ -120,7 +120,7 @@ hjkhjk
 
 
 def test_preprocess_custom_identifier():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.markdown_identifier = "Custom&"
     markdown = """\
 This is a test
@@ -135,7 +135,7 @@ hjkhjk
 
 
 def test_preprocess_custom_ignores_default_identifier():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.markdown_identifier = "Custom&"
     markdown = """\
 
@@ -150,7 +150,7 @@ hjkhjk
 
 
 def test_preprocess_multiple():
-    config = IdentifierCaption()
+    config = FigureCaption()
     markdown = """\
 This is a test
 
@@ -183,7 +183,7 @@ DEFAULT_FIGURE_CAPTION = (
 
 
 def test_postprocess_disabled():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.enable = False
     html = p(a(DEFAULT_FIGURE_CAPTION), DEFAULT_IMG)
     parser = etree.HTMLParser()
@@ -196,7 +196,7 @@ def test_postprocess_disabled():
 
 
 def test_postprocess_no_identifier():
-    config = IdentifierCaption()
+    config = FigureCaption()
     html = p(a("caption"), '<img id="test" src="test.png">')
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
@@ -208,7 +208,7 @@ def test_postprocess_no_identifier():
 
 
 def test_postprocess_shortcut_extendet_syntax():
-    config = IdentifierCaption()
+    config = FigureCaption()
     img_with_caption = '<img id="test" src="test.png" alt="Test" title="My Caption">'
     html = p(a(DEFAULT_FIGURE_CAPTION), img_with_caption)
     parser = etree.HTMLParser()
@@ -224,7 +224,7 @@ def test_postprocess_shortcut_extendet_syntax():
 
 
 def test_postprocess_shortcut_extendet_syntax_alt_text():
-    config = IdentifierCaption()
+    config = FigureCaption()
     img_with_caption = '<img id="test" src="test.png" alt="Test">'
     html = p(a(DEFAULT_FIGURE_CAPTION), img_with_caption)
     parser = etree.HTMLParser()
@@ -240,7 +240,7 @@ def test_postprocess_shortcut_extendet_syntax_alt_text():
 
 
 def test_postprocess_default_identifier():
-    config = IdentifierCaption()
+    config = FigureCaption()
     html = p(a(DEFAULT_FIGURE_CAPTION), DEFAULT_IMG)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
@@ -253,7 +253,7 @@ def test_postprocess_default_identifier():
 
 
 def test_postprocess_multiple():
-    config = IdentifierCaption()
+    config = FigureCaption()
     caption1 = '<figure-caption identifier="Figure">First</figure-caption>'
     caption2 = '<figure-caption identifier="Figure">Second</figure-caption>'
 
@@ -272,7 +272,7 @@ def test_postprocess_multiple():
 
 
 def test_postprocess_multiple_nested():
-    config = IdentifierCaption()
+    config = FigureCaption()
     caption1 = '<figure-caption identifier="Figure">First</figure-caption>'
     caption2 = '<figure-caption identifier="Figure">Second</figure-caption>'
 
@@ -291,7 +291,7 @@ def test_postprocess_multiple_nested():
 
 
 def test_postprocess_custom_start_index():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.start_index = 10
     html = p(a(DEFAULT_FIGURE_CAPTION), DEFAULT_IMG)
     parser = etree.HTMLParser()
@@ -304,7 +304,7 @@ def test_postprocess_custom_start_index():
 
 
 def test_postprocess_custom_increment():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.increment_index = 10
     caption1 = '<figure-caption identifier="Figure">First</figure-caption>'
     caption2 = '<figure-caption identifier="Figure">Second</figure-caption>'
@@ -320,7 +320,7 @@ def test_postprocess_custom_increment():
 
 
 def test_postprocess_position():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.position = "top"
     html = p(a(DEFAULT_FIGURE_CAPTION), DEFAULT_IMG)
     parser = etree.HTMLParser()
@@ -342,7 +342,7 @@ def test_postprocess_position():
 
 
 def test_postprocess_default_id():
-    config = IdentifierCaption()
+    config = FigureCaption()
     html = p(a(DEFAULT_FIGURE_CAPTION), DEFAULT_IMG)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
@@ -354,7 +354,7 @@ def test_postprocess_default_id():
 
 
 def test_postprocess_custom_id():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.default_id = "custom-{identifier}-{index}"
     html = p(a(DEFAULT_FIGURE_CAPTION), DEFAULT_IMG)
     parser = etree.HTMLParser()
@@ -376,7 +376,7 @@ def test_postprocess_custom_id():
 
 
 def test_postprocess_custom_caption_prefix():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.caption_prefix = "custom {identifier} {index}:"
     html = p(a(DEFAULT_FIGURE_CAPTION), DEFAULT_IMG)
     parser = etree.HTMLParser()
@@ -389,7 +389,7 @@ def test_postprocess_custom_caption_prefix():
 
 
 def test_postprocess_default_reference():
-    config = IdentifierCaption()
+    config = FigureCaption()
     reference_element = '<a href="#_figure-1"></a>'
     html = p(a(DEFAULT_FIGURE_CAPTION), DEFAULT_IMG, p(reference_element))
     parser = etree.HTMLParser()
@@ -402,7 +402,7 @@ def test_postprocess_default_reference():
 
 
 def test_postprocess_ignore_reference_with_text():
-    config = IdentifierCaption()
+    config = FigureCaption()
     reference_element = '<a href="#_figure-1">Test</a>'
     html = p(a(DEFAULT_FIGURE_CAPTION), DEFAULT_IMG, p(reference_element))
     parser = etree.HTMLParser()
@@ -415,7 +415,7 @@ def test_postprocess_ignore_reference_with_text():
 
 
 def test_postprocess_custom_reference():
-    config = IdentifierCaption()
+    config = FigureCaption()
     config.reference_text = "custom {identifier} {index}"
     reference_element = '<a href="#_figure-1"></a>'
     html = p(a(DEFAULT_FIGURE_CAPTION), DEFAULT_IMG, p(reference_element))
@@ -429,7 +429,7 @@ def test_postprocess_custom_reference():
 
 
 def test_figure_caption_with_no_img(caplog):
-    config = IdentifierCaption()
+    config = FigureCaption()
     img = '<img id="test" src="test.png">'
     html = p(a(DEFAULT_FIGURE_CAPTION), a(p("hell0")), img)
     parser = etree.HTMLParser()
@@ -445,7 +445,7 @@ def test_figure_caption_with_no_img(caplog):
 
 
 def test_figure_caption_with_xml(caplog):
-    config = IdentifierCaption()
+    config = FigureCaption()
     img = '<img id="test" src="test.png" title="<hello>This is not nice"'
     html = p(img)
     parser = etree.HTMLParser()
@@ -458,3 +458,34 @@ def test_figure_caption_with_xml(caplog):
     # htmlparser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
     assert result == '<p><img id="test" src="test.png"></p>'
+
+
+def test_figure_caption_ignores_inline():
+    config = FigureCaption()
+    img = 'Hello <img id="test" src="test.png" alt="alt text"> you'
+    html = p(img)
+    parser = etree.HTMLParser()
+    tree = etree.fromstring(html, parser)
+    logger = get_logger("test.md")
+    image.postprocess_html(tree=tree, config=config, logger=logger)
+    result = etree.tostring(tree, encoding="unicode", method="html")
+    # htmlparser adds <html><body> tags, remove them
+    result = result[len("<html><body>") : -len("</body></html>")]
+    result = result[len("<p>") : -len("</p>")]
+    assert result == img
+
+
+def test_figure_caption_ignores_alt_if_disabled():
+    config = FigureCaption()
+    config.ignore_alt = True
+    img = '<img id="test" src="test.png" alt="alt text">'
+    html = p(img)
+    parser = etree.HTMLParser()
+    tree = etree.fromstring(html, parser)
+    logger = get_logger("test.md")
+    image.postprocess_html(tree=tree, config=config, logger=logger)
+    result = etree.tostring(tree, encoding="unicode", method="html")
+    # htmlparser adds <html><body> tags, remove them
+    result = result[len("<html><body>") : -len("</body></html>")]
+    result = result[len("<p>") : -len("</p>")]
+    assert result == img
