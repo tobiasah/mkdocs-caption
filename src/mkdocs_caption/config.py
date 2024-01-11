@@ -99,6 +99,20 @@ class IdentifierCaption(base.Config):
         return self._format_string(self.default_id, identifier, index=index)
 
 
+class FigureCaption(IdentifierCaption):
+    """The configuration options for the figure identifier.
+
+    This configuration derived from IdentifierCaption and adds additional
+    configuration options.
+
+    Args:
+        ignore_alt: Flag if the alt text should be ignored for captions or
+            not.
+    """
+
+    ignore_alt = config_options.Type(bool, default=False)
+
+
 class CaptionConfig(base.Config):
     """The configuration options for the Caption plugin.
 
@@ -115,7 +129,7 @@ class CaptionConfig(base.Config):
         default=[],
     )
     table = config_options.SubConfig(IdentifierCaption)
-    figure = config_options.SubConfig(IdentifierCaption)
+    figure = config_options.SubConfig(FigureCaption)
     custom = config_options.SubConfig(IdentifierCaption)
 
 

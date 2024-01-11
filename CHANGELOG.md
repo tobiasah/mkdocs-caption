@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.0.11
+
+* Prevent conversion of inline images even if they have an alt text (#9)
+
 ## Version 0.0.10
 
 * Allow caption elements within indented blocks (e.g. admonitions). Can be disabled

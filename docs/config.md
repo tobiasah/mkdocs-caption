@@ -29,6 +29,7 @@ plugins:
       caption_prefix: 'Figure {index}:'
       markdown_identifier: 'Figure:'
       allow_indented_caption: True
+      ignore_alt: False
     custom: # (4)!
       enable: true
       start_index: 1
@@ -72,6 +73,8 @@ The following table lists all available options.
 | caption_prefix | The prefix put before of the caption text |
 | markdown_identifier | The identifier that this plugin will search for in the markdown. (Note that every match of this identifier will be treated as a caption element. A false match will most likely result in an error) |
 | allow_indented_caption | Flag if caption elements should also be parsed within indented blocks. By default this is enabled. |
+| ignore_alt | Flag if the alt attribute should be ignored. This will disable the feature that 
+uses the alt text as a caption. (Only available for figures)|
 
 ## Overwriting the default configuration
 
