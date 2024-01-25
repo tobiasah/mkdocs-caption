@@ -184,6 +184,8 @@ def postprocess_html(
     index = config.start_index
     for img_element in tree.xpath("//p/a/img|//p/img"):
         figure_attrib = custom_figure_attrib.get(img_element, {})
+        if img_element.attrib.get("class", None) in config.ignore_classes:
+            continue
         # We pop the title here so its not duplicated in the img element
         title = img_element.attrib.pop("title", None)
         if title is None:

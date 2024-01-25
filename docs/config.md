@@ -30,6 +30,7 @@ plugins:
       markdown_identifier: 'Figure:'
       allow_indented_caption: True
       ignore_alt: False
+      ignore_classes: ["twemoji"]
     custom: # (4)!
       enable: true
       start_index: 1
@@ -74,7 +75,8 @@ The following table lists all available options.
 | markdown_identifier | The identifier that this plugin will search for in the markdown. (Note that every match of this identifier will be treated as a caption element. A false match will most likely result in an error) |
 | allow_indented_caption | Flag if caption elements should also be parsed within indented blocks. By default this is enabled. |
 | ignore_alt | Flag if the alt attribute should be ignored. This will disable the feature that 
-uses the alt text as a caption. (Only available for figures)|
+uses the alt text as a caption. (Only available for figures) |
+| ignore_classes | List of classes ignored when adding the captions. (Only available for figures) |
 
 ## Overwriting the default configuration
 

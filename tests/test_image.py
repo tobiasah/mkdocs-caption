@@ -489,3 +489,33 @@ def test_figure_caption_ignores_alt_if_disabled():
     result = result[len("<html><body>") : -len("</body></html>")]
     result = result[len("<p>") : -len("</p>")]
     assert result == img
+
+
+def test_figure_caption_uses_unmarked_classes():
+    config = FigureCaption()
+    img = '<img class="custom_class" src="test.png" title="=text" id="test_id">'
+    html = p(img)
+    parser = etree.HTMLParser()
+    tree = etree.fromstring(html, parser)
+    logger = get_logger("test.md")
+    image.postprocess_html(tree=tree, config=config, logger=logger)
+    result = etree.tostring(tree, encoding="unicode", method="html")
+    # htmlparser adds <html><body> tags, remove them
+    result = result[len("<html><body>") : -len("</body></html>")]
+    result = result[len("<p>") : -len("</p>")]
+    assert "figcaption" in result
+
+
+def test_figure_caption_ignores_marked_classes():
+    config = FigureCaption()
+    img = '<img class="twemoji" src="test.png" title="=text" id="test_id">'
+    html = p(img)
+    parser = etree.HTMLParser()
+    tree = etree.fromstring(html, parser)
+    logger = get_logger("test.md")
+    image.postprocess_html(tree=tree, config=config, logger=logger)
+    result = etree.tostring(tree, encoding="unicode", method="html")
+    # htmlparser adds <html><body> tags, remove them
+    result = result[len("<html><body>") : -len("</body></html>")]
+    result = result[len("<p>") : -len("</p>")]
+    assert result == img

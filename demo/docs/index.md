@@ -25,7 +25,7 @@ and it goes on for multiple lines
 
     ![](assets/demo.png){width="200"}
 
-Inline images should not be converted ![Hello](assets/demo.png){width="30"}, even if they have a alt text.
+Inline images should not be converted ![Hello](assets/demo.png){width="30"}, even if they have a alt text. :smile:
 
 ## Tables
 
