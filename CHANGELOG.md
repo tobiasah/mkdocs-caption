@@ -2,6 +2,12 @@
 
 ## Version 0.0.11
 
+* Prevent conversion of emojis into figure elements with captions.
+* Add new config parameter `ignore_classes` to explicitly prevent conversion 
+  of specific images into figures.
+
+## Version 0.0.11
+
 * Prevent conversion of inline images even if they have an alt text (#9)
 
 ## Version 0.0.10

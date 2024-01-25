@@ -111,6 +111,10 @@ class FigureCaption(IdentifierCaption):
     """
 
     ignore_alt = config_options.Type(bool, default=False)
+    ignore_classes = config_options.ListOfItems(
+        config_options.Type(str),
+        default=["twemoji"],
+    )
 
 
 class CaptionConfig(base.Config):
