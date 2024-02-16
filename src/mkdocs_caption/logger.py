@@ -1,4 +1,5 @@
 """Setup custom logger that is mkdocs compatible."""
+
 from __future__ import annotations
 
 import logging

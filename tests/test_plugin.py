@@ -1,4 +1,5 @@
 """Test the plugin with a MkDocs demo site."""
+
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock

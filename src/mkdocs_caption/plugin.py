@@ -1,4 +1,5 @@
 """MkDocs plugin for custom image and table captions."""
+
 from lxml import etree
 from mkdocs.config.defaults import MkDocsConfig
 from mkdocs.plugins import BasePlugin, event_priority

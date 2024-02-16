@@ -17,6 +17,10 @@ With the plugin enabled, one can now use an easy and descriptive syntax to add
 captions to figures and tables. The captions are automatically numbered and
 can be referenced in the text.
 
+!!! tip
+
+    The caption text is converted by mkdocs itself. This means that technically
+    a caption can contain the same things than any other text.
 
 === "Markdown"
 

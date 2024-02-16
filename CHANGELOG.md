@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.1.0
+
+* Allow markdown syntax within the caption element.
+
 ## Version 1.0.0
 
 * Prevent conversion of emojis into figure elements with captions.
