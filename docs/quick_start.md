@@ -23,7 +23,7 @@ can be referenced in the text.
     ```Markdown
     ![figure caption](img.jpg)
 
-    Table: table caption (#my-table)
+    Table: table caption {#my-table}
 
     | heading 1| heading 2 | 
     | - | - | 
