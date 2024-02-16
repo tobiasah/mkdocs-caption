@@ -1,7 +1,10 @@
 """General helper functions for the mkdocs-caption plugin."""
+
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
+from typing import Iterator
 
 from lxml import etree
 
@@ -74,7 +77,7 @@ def _escape_md_caption(match: re.Match, *, target_tag: str) -> str:
     options = _parse_extended_markdown(match.group(5))
     return str(
         f'\n{prefix}<{target_tag} identifier="{identifier}"'
-        f"{options}>{caption}</{target_tag}>\n\n",
+        f"{options}>\n\n{prefix}{caption}\n\n{prefix}<{target_tag}-end>\n\n",
     )
 
 
@@ -108,13 +111,78 @@ def wrap_md_captions(
     )
 
 
-def sanitize_caption(caption: str | None) -> str:
-    """Sanitize a caption to be used as an id.
+def create_caption_str(caption_text_elements: list[TreeElement]) -> str:
+    """Create a htaml string from a list of caption text elements.
+
+    This function takes a list of caption text elements and returns a string
+    with the caption text.
 
     Args:
-        caption: The caption to sanatize.
+        caption_text_elements: The list of caption text elements.
 
     Returns:
-        The sanitized caption.
+        A string with the caption text.
     """
-    return caption.replace(" & ", " &amp; ") if caption else ""
+    caption_text = ""
+    for text_element in caption_text_elements:
+        caption_text += etree.tostring(
+            text_element,
+            encoding="unicode",
+            method="html",
+        ).strip("\n")
+    if len(caption_text_elements) == 1:
+        caption_text = caption_text.strip("<p>").strip("</p>")
+    return caption_text
+
+
+@dataclass
+class CaptionInfo:
+    """Dataclass to store information about a caption."""
+
+    target_element: TreeElement
+    attributes: dict[str, str]
+    caption: str
+    identifier: str
+
+
+def iter_caption_elements(tag: str, tree: TreeElement) -> Iterator[CaptionInfo]:
+    """Iterate over all caption elements in an XML tree.
+
+    This function takes an XML tree and iterates over all caption elements
+    in the tree. It yields a tuple with the target element, the attributes
+    of the caption element, the caption text, and the identifier of the
+    caption element.
+
+    Args:
+        tag: The tag of the caption elements.
+        tree: The XML tree to iterate over.
+
+    Yields:
+        A tuple with the target element, the attributes of the caption
+        element, the caption text, and the identifier of the caption element.
+    """
+    for caption_element in tree.xpath(f"//{tag}"):
+        a_wrapper = caption_element.getparent()
+        caption_text_elements = []
+        a_wrapper_end = a_wrapper.getnext()
+        while a_wrapper_end is not None and not a_wrapper_end.xpath(f"{tag}-end"):
+            caption_text_elements.append(a_wrapper_end)
+            a_wrapper_end = a_wrapper_end.getnext()
+
+        target_element = a_wrapper_end.getnext()
+        # unused attribute identifier
+        identifier = caption_element.attrib.pop("identifier")
+
+        try:
+            yield CaptionInfo(
+                target_element=target_element,
+                attributes=caption_element.attrib,
+                caption=create_caption_str(caption_text_elements),
+                identifier=identifier,
+            )
+        finally:
+            a_wrapper.remove(caption_element)
+            a_wrapper.getparent().remove(a_wrapper)
+            for caption_text_element in caption_text_elements:
+                caption_text_element.getparent().remove(caption_text_element)
+            a_wrapper_end.getparent().remove(a_wrapper_end)

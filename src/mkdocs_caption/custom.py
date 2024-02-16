@@ -1,11 +1,18 @@
 """Custom caption handling."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
 from lxml import etree
 
-from mkdocs_caption.helper import TreeElement, update_references, wrap_md_captions
+from mkdocs_caption.helper import (
+    CaptionInfo,
+    TreeElement,
+    iter_caption_elements,
+    update_references,
+    wrap_md_captions,
+)
 
 if TYPE_CHECKING:
     from mkdocs_caption.config import IdentifierCaption
@@ -47,11 +54,10 @@ def preprocess_markdown(
 
 
 def _wrap_in_figure(
-    caption_element: TreeElement,
+    caption_info: CaptionInfo,
     *,
     tree: TreeElement,
     index: int,
-    identifier: str,
     config: IdentifierCaption,
     logger: PluginLogger,
 ) -> None:
@@ -62,52 +68,55 @@ def _wrap_in_figure(
     with a custom caption based on the caption element, index, and identifier.
 
     Args:
-        caption_element: The caption element to use for the caption text.
+        caption_info: The caption info.
         tree: The root element of the XML tree.
         index: The index of the figure element.
-        identifier: The identifier of the custom caption.
         config: The plugin configuration.
         logger: Current plugin logger.
     """
-    a_wrapper: TreeElement = caption_element.getparent()  # type: ignore[assignment]
-    target_element = a_wrapper.getnext()
-    if target_element is None:
+    if caption_info.target_element is None:
         logger.error("Custom caption does not semm to have a element that follows it")
         return
 
     figure_element = etree.Element("figure", None, None)
-    figure_element.attrib.update(caption_element.attrib)
+    figure_element.attrib.update(caption_info.attributes)
     # wrap target element
-    target_element.addprevious(figure_element)
+    caption_info.target_element.addprevious(figure_element)
 
     # add caption
-    caption_prefix = config.get_caption_prefix(identifier=identifier, index=index)
+    caption_prefix = config.get_caption_prefix(
+        identifier=caption_info.identifier,
+        index=index,
+    )
     try:
         fig_caption_element = etree.fromstring(
-            f"<figcaption>{caption_prefix} {caption_element.text}</figcaption>",
+            f"<figcaption>{caption_prefix} {caption_info.caption}</figcaption>",
         )
     except etree.XMLSyntaxError:
-        logger.error("Invalid XML in caption: %s", caption_element.text)
+        logger.error(
+            'Invalid XML in caption: <caption style="caption-side:%s">%s %s</caption>',
+            config.position,
+            caption_prefix,
+            caption_info.caption,
+        )
         return
     if config.position == "top":
         figure_element.append(fig_caption_element)
-        figure_element.append(target_element)
+        figure_element.append(caption_info.target_element)
     else:
-        figure_element.append(target_element)
+        figure_element.append(caption_info.target_element)
         figure_element.append(fig_caption_element)
 
-    figure_id = caption_element.attrib.get(
+    figure_id = caption_info.attributes.get(
         "id",
-        config.get_default_id(identifier=identifier, index=index),
+        config.get_default_id(identifier=caption_info.identifier, index=index),
     )
     figure_element.attrib["id"] = figure_id
     update_references(
         tree,
         figure_id,
-        config.get_reference_text(identifier=identifier, index=index),
+        config.get_reference_text(identifier=caption_info.identifier, index=index),
     )
-    a_wrapper.remove(caption_element)
-    a_wrapper.getparent().remove(a_wrapper)  # type: ignore[union-attr]
 
 
 def postprocess_html(
@@ -129,15 +138,13 @@ def postprocess_html(
     if not config.enable:
         return
     index_dict: dict[str, int] = {}
-    for custom_caption in tree.xpath(f"//{CAPTION_TAG}"):
-        identifier = custom_caption.attrib.pop("identifier")
-        index = index_dict.get(identifier, config.start_index)
-        index_dict[identifier] = index + config.increment_index
+    for caption_info in iter_caption_elements(CAPTION_TAG, tree):
+        index = index_dict.get(caption_info.identifier, config.start_index)
+        index_dict[caption_info.identifier] = index + config.increment_index
         _wrap_in_figure(
-            custom_caption,
+            caption_info,
             tree=tree,
             index=index,
-            identifier=identifier,
             config=config,
             logger=logger,
         )

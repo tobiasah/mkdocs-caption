@@ -1,4 +1,5 @@
 """Handle table related captioning."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -6,8 +7,9 @@ from typing import TYPE_CHECKING
 from lxml import etree
 
 from mkdocs_caption.helper import (
+    CaptionInfo,
     TreeElement,
-    sanitize_caption,
+    iter_caption_elements,
     update_references,
     wrap_md_captions,
 )
@@ -66,10 +68,9 @@ def _create_colgroups(coldef: str) -> TreeElement:
 
 
 def _add_caption_to_table(
-    table_element: TreeElement,
+    caption_info: CaptionInfo,
     *,
     tree: TreeElement,
-    caption_element: TreeElement,
     index: int,
     config: IdentifierCaption,
     logger: PluginLogger,
@@ -81,20 +82,18 @@ def _add_caption_to_table(
     and index.
 
     Args:
-        table_element: The table element to add the caption to.
+        caption_info: Caption info
         tree: The root element of the XML tree.
-        caption_element: The caption element to use for the caption text.
         index: The index of the table element.
         config: The plugin configuration.
         logger: Current plugin logger.
     """
     caption_prefix = config.get_caption_prefix(index=index, identifier="table")
-    caption_text = sanitize_caption(caption_element.text)
     try:
         table_caption_element = etree.fromstring(
             str(
                 f'<caption style="caption-side:{config.position}">'
-                f"{caption_prefix} {caption_text}</caption>",
+                f"{caption_prefix} {caption_info.caption}</caption>",
             ),
         )
     except etree.XMLSyntaxError:
@@ -102,20 +101,23 @@ def _add_caption_to_table(
             'Invalid XML in caption: <caption style="caption-side:%s">%s %s</caption>',
             config.position,
             caption_prefix,
-            caption_text,
+            caption_info.caption,
         )
         return
-    table_element.insert(0, table_caption_element)
+    caption_info.target_element.insert(0, table_caption_element)
 
-    if "cols" in caption_element.attrib:
-        table_element.insert(0, _create_colgroups(caption_element.attrib["cols"]))
-        caption_element.attrib.pop("cols")
-    table_element.attrib.update(caption_element.attrib)
-    table_id = table_element.attrib.get(
+    if "cols" in caption_info.attributes:
+        caption_info.target_element.insert(
+            0,
+            _create_colgroups(caption_info.attributes["cols"]),
+        )
+        caption_info.attributes.pop("cols")
+    caption_info.target_element.attrib.update(caption_info.attributes)
+    table_id = caption_info.target_element.attrib.get(
         "id",
         config.get_default_id(index=index, identifier="table"),
     )
-    table_element.attrib["id"] = table_id
+    caption_info.target_element.attrib["id"] = table_id
     update_references(
         tree,
         table_id,
@@ -142,26 +144,18 @@ def postprocess_html(
     if not config.enable:
         return
     index = config.start_index
-    for table_caption in tree.xpath(f"//{TABLE_CAPTION_TAG}"):
-        a_wrapper = table_caption.getparent()
-        target_element = a_wrapper.getnext()
-        if target_element.tag != "table":
+    for caption_info in iter_caption_elements(TABLE_CAPTION_TAG, tree):
+        if caption_info.target_element.tag != "table":
             logger.error(
                 "Table caption must be followed by a table element. Skipping: %s",
-                table_caption.text,
+                caption_info.caption,
             )
             continue
-        # unused attribute identifier
-        table_caption.attrib.pop("identifier")
-
         _add_caption_to_table(
-            target_element,
+            caption_info=caption_info,
             tree=tree,
-            caption_element=table_caption,
             index=index,
             config=config,
             logger=logger,
         )
-        a_wrapper.remove(table_caption)
-        a_wrapper.getparent().remove(a_wrapper)
         index += config.increment_index

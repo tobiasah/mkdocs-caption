@@ -29,7 +29,7 @@ Inline images should not be converted ![Hello](assets/demo.png){width="30"}, eve
 
 ## Tables
 
-Table: Table caption
+Table: Table **bold** caption
 
 | My | Table |
 | - | - |

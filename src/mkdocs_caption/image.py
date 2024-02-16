@@ -1,11 +1,17 @@
 """Handle image related captioning."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
 from lxml import etree
 
-from mkdocs_caption.helper import TreeElement, update_references, wrap_md_captions
+from mkdocs_caption.helper import (
+    TreeElement,
+    iter_caption_elements,
+    update_references,
+    wrap_md_captions,
+)
 
 if TYPE_CHECKING:
     from mkdocs_caption.config import FigureCaption
@@ -159,27 +165,22 @@ def postprocess_html(
 
     # Handle additional figure caption elements
     custom_figure_attrib = {}
-    for custom_caption in tree.xpath(f"//{IMG_CAPTION_TAG}"):
-        a_wrapper = custom_caption.getparent()
+    for caption_info in iter_caption_elements(IMG_CAPTION_TAG, tree):
         try:
-            next_element = a_wrapper.getnext()
             target_element = (
-                next_element
-                if next_element.tag == "img"
-                else next_element.xpath(".//img")[0]
+                caption_info.target_element
+                if caption_info.target_element.tag == "img"
+                else caption_info.target_element.xpath(".//img")[0]
             )
         except IndexError:
             logger.error(
                 "Figure caption must be followed by a img element. Skipping: %s",
-                custom_caption.text,
+                caption_info.caption,
             )
             continue
-        target_element.attrib["title"] = custom_caption.text
-        # unused attribute identifier
-        custom_caption.attrib.pop("identifier")
-        custom_figure_attrib[target_element] = custom_caption.attrib
-        a_wrapper.remove(custom_caption)
-        a_wrapper.getparent().remove(a_wrapper)
+        target_element.attrib["title"] = caption_info.caption
+        custom_figure_attrib[target_element] = caption_info.attributes
+
     # Iterate through all images and wrap them in a figure element if requested
     index = config.start_index
     for img_element in tree.xpath("//p/a/img|//p/img"):
