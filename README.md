@@ -20,6 +20,14 @@ Enhance your [MkDocs](https://www.mkdocs.org/) documentation with easy figure, t
 
 -----
 
+## Background
+
+I developed `mkdocs-caption` when I switched from  [Antora](https://antora.org/) ([AsciiDoc](https://asciidoc.org/)) to [MkDocs](https://www.mkdocs.org/) and was missing a native and comprehensive figure and table caption system.
+
+`mkdocs-caption` uses many ideas and markdown syntax from [flywire/caption](https://github.com/flywire/caption), which itself is a fork of [yafg](https://git.sr.ht/~ferruck/yafg) - yet another figure generator plugin for Python's Markdown. Although initially developed separately and not sharing any code, I was made aware of [flywire/caption](https://github.com/flywire/caption), and it's worth crediting it here.
+
+-----
+
 ## Documentation
 
 For full documentation, visit [https://tobiasah.github.io/mkdocs-caption/](https://tobiasah.github.io/mkdocs-caption/).
