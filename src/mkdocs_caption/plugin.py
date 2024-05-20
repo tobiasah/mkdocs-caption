@@ -7,6 +7,7 @@ from mkdocs.structure.pages import Page
 
 from mkdocs_caption import config, custom, image, table
 from mkdocs_caption.logger import get_logger
+from mkdocs_caption.post_processor import PostProcessor
 
 
 class CaptionPlugin(BasePlugin[config.CaptionConfig]):
@@ -33,6 +34,7 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
             The global configuration object.
         """
         self._config = config.plugins["caption"].config
+        self._post_processor = PostProcessor(self._config.cross_reference_text)
         return config
 
     def _get_config(self, page: Page) -> config.CaptionConfig:
@@ -70,14 +72,14 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
         config = self._get_config(page)
         try:
             markdown = table.preprocess_markdown(markdown, config=self._config.table)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001  # pragma: no cover
             logger.error(
                 "Unexpected Error while preprocessing the tables, skipping: %s",
                 e,
             )
         try:
             markdown = image.preprocess_markdown(markdown, config=self._config.figure)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001  # pragma: no cover
             logger.error(
                 "Unexpected Error while preprocessing the images, skipping: %s",
                 e,
@@ -88,7 +90,7 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
                 config=self._config.custom,
                 identifiers=config.additional_identifier,
             )
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001  # pragma: no cover
             logger.error(
                 "Unexpected Error while preprocessing the custom, skipping: %s",
                 e,
@@ -117,14 +119,49 @@ class CaptionPlugin(BasePlugin[config.CaptionConfig]):
         try:
             parser = etree.HTMLParser()
             tree = etree.fromstring(html, parser)
-            if tree is None:
+            if tree is None:  # pragma: no cover
                 return html
-            table.postprocess_html(tree=tree, config=config["table"], logger=logger)
-            custom.postprocess_html(tree=tree, config=config["custom"], logger=logger)
-            image.postprocess_html(tree=tree, config=config["figure"], logger=logger)
+            table.postprocess_html(
+                tree=tree,
+                config=config["table"],
+                page=page,
+                post_processor=self._post_processor,
+                logger=logger,
+            )
+            custom.postprocess_html(
+                tree=tree,
+                config=config["custom"],
+                logger=logger,
+                page=page,
+                post_processor=self._post_processor,
+            )
+            image.postprocess_html(
+                tree=tree,
+                config=config["figure"],
+                page=page,
+                post_processor=self._post_processor,
+                logger=logger,
+            )
             html_result = etree.tostring(tree, encoding="unicode", method="html")
             # HTMLParser adds <html><body> tags, remove them
             return html_result[len("<html><body>") : -len("</body></html>")]
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001  # pragma: no cover
             logger.error("Unexpected Error skipping: %s", e)
             return html
+
+    def on_post_page(self, output: str, page: Page, **_) -> str:
+        """Process the output of a page after it has been rendered.
+
+        The `post_page` event is called after the page has been rendered to HTML
+        and can be used to alter the final output.
+
+        Args:
+            output: HTML content of the page as string
+            page: `mkdocs.nav.Page` instance
+            config: global configuration object
+            files: global files collection
+
+        Returns:
+            The processed output of the page.
+        """
+        return self._post_processor.post_process(page, output)

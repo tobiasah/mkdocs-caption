@@ -9,13 +9,15 @@ from lxml import etree
 from mkdocs_caption.helper import (
     TreeElement,
     iter_caption_elements,
-    update_references,
     wrap_md_captions,
 )
 
 if TYPE_CHECKING:
+    from mkdocs.structure.pages import Page
+
     from mkdocs_caption.config import FigureCaption
     from mkdocs_caption.logger import PluginLogger
+    from mkdocs_caption.post_processor import PostProcessor
 
 IMG_CAPTION_TAG = "figure-caption"
 
@@ -82,11 +84,12 @@ def postprocess_image(
     *,
     img_element: TreeElement,
     title: str,
-    tree: TreeElement,
     config: FigureCaption,
     logger: PluginLogger,
     index: int,
     figure_attrib: dict[str, str] | None,
+    page: Page,
+    post_processor: PostProcessor,
 ) -> None:
     """Postprocess an image element to handle custom image captions.
 
@@ -97,29 +100,30 @@ def postprocess_image(
     Args:
         img_element: The image element to postprocess.
         title: The title of the image.
-        tree: The root element of the XML tree.
         config: The plugin configuration.
         logger: Current plugin logger.
         index: The index of the image element.
         figure_attrib: Additional attributes for the figure element.
+        page: The current page.
+        post_processor: The post processor to register targets.
     """
-    # Its a bit of a tricky situation here. The used can specify a custom id
+    # Its a bit of a tricky situation here. The user can specify a custom id
     # both on the figure element and the image element. The references to both
     # of these elements needs to be updated.
     if "id" in img_element.attrib:
-        update_references(
-            tree,
+        post_processor.register_target(
             img_element.attrib["id"],
             config.get_reference_text(index=index, identifier="figure"),
+            page,
         )
     if not figure_attrib:
         figure_attrib = {}
     if "id" not in figure_attrib:
         figure_attrib["id"] = config.get_default_id(index=index, identifier="figure")
-    update_references(
-        tree,
+    post_processor.register_target(
         figure_attrib["id"],
         config.get_reference_text(index=index, identifier="figure"),
+        page,
     )
     # assemble the caption element
     caption_prefix = config.get_caption_prefix(
@@ -146,6 +150,8 @@ def postprocess_html(
     *,
     tree: TreeElement,
     config: FigureCaption,
+    page: Page,
+    post_processor: PostProcessor,
     logger: PluginLogger,
 ) -> None:
     """Postprocess an XML tree to handle custom image captions.
@@ -158,6 +164,8 @@ def postprocess_html(
     Args:
         tree: The root element of the XML tree.
         config: The plugin configuration.
+        page: The current page.
+        post_processor: The post processor to register targets.
         logger: Current plugin logger.
     """
     if not config.enable:
@@ -197,10 +205,11 @@ def postprocess_html(
         postprocess_image(
             img_element=img_element,
             title=title,
-            tree=tree,
             config=config,
             logger=logger,
             index=index,
             figure_attrib=figure_attrib,
+            page=page,
+            post_processor=post_processor,
         )
         index += config.increment_index

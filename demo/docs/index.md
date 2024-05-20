@@ -27,6 +27,10 @@ and it goes on for multiple lines
 
 Inline images should not be converted ![Hello](assets/demo.png){width="30"}, even if they have a alt text. :smile:
 
+### Cross page reference
+
+See local [](#my_id) or cross page [](second_page.md#my_id) in that page. The same with a text [Test](second_page.md#my_id)
+
 ## Tables
 
 Table: Table **bold** caption

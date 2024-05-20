@@ -5,6 +5,7 @@ from lxml import etree
 from mkdocs_caption import table
 from mkdocs_caption.config import IdentifierCaption
 from mkdocs_caption.logger import get_logger
+from mkdocs_caption.post_processor import PostProcessor
 
 
 def test_preprocess_disabled():
@@ -151,42 +152,60 @@ DEFAULT_TABLE_CAPTION = (
 )
 
 
-def test_postprocess_disabled():
+def test_postprocess_disabled(dummy_page):
     config = IdentifierCaption()
     config.enable = False
     html = div(DEFAULT_TABLE_CAPTION, DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert DEFAULT_TABLE in result
 
 
-def test_postprocess_no_identifier():
+def test_postprocess_no_identifier(dummy_page):
     config = IdentifierCaption()
     html = div(a("caption"), DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
     assert result == html
 
 
-def test_postprocess_default_identifier():
+def test_postprocess_default_identifier(dummy_page):
     config = IdentifierCaption()
     html = div(DEFAULT_TABLE_CAPTION, DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert (
         '<caption style="caption-side:bottom">Table 1: My Caption</caption>' in result
     )
 
 
-def test_postprocess_multiline_caption():
+def test_postprocess_multiline_caption(dummy_page):
     config = IdentifierCaption()
     caption = (
         '<p><table-caption identifier="Table"></p>'
@@ -195,7 +214,13 @@ def test_postprocess_multiline_caption():
     html = div(caption, DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert (
         '<caption style="caption-side:bottom">Table 1: <p>My Caption</p>'
@@ -203,7 +228,7 @@ def test_postprocess_multiline_caption():
     ) in result
 
 
-def test_postprocess_multiple():
+def test_postprocess_multiple(dummy_page):
     config = IdentifierCaption()
     caption1 = (
         '<p><table-caption identifier="Table"></p>'
@@ -216,26 +241,38 @@ def test_postprocess_multiple():
     html = div(div(caption1, DEFAULT_TABLE), div(caption2, DEFAULT_TABLE))
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert '<caption style="caption-side:bottom">Table 1: First</caption>' in result
     assert '<caption style="caption-side:bottom">Table 2: Second</caption>' in result
 
 
-def test_postprocess_custom_start_index():
+def test_postprocess_custom_start_index(dummy_page):
     config = IdentifierCaption()
     config.start_index = 10
     html = div(DEFAULT_TABLE_CAPTION, DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert (
         '<caption style="caption-side:bottom">Table 10: My Caption</caption>' in result
     )
 
 
-def test_postprocess_custom_increment():
+def test_postprocess_custom_increment(dummy_page):
     config = IdentifierCaption()
     config.increment_index = 10
     caption1 = (
@@ -249,67 +286,109 @@ def test_postprocess_custom_increment():
     html = div(div(caption1, DEFAULT_TABLE), div(caption2, DEFAULT_TABLE))
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert '<caption style="caption-side:bottom">Table 1: First</caption>' in result
     assert '<caption style="caption-side:bottom">Table 11: Second</caption>' in result
 
 
-def test_postprocess_position():
+def test_postprocess_position(dummy_page):
     config = IdentifierCaption()
     config.position = "top"
     html = div(DEFAULT_TABLE_CAPTION, DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert '<caption style="caption-side:top">Table 1: My Caption</caption>' in result
 
     config.position = "bottom"
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert (
         '<caption style="caption-side:bottom">Table 1: My Caption</caption>' in result
     )
 
 
-def test_postprocess_default_id():
+def test_postprocess_default_id(dummy_page):
     config = IdentifierCaption()
     html = div(DEFAULT_TABLE_CAPTION, DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert 'id="_table-1"' in result
 
 
-def test_postprocess_custom_id():
+def test_postprocess_custom_id(dummy_page):
     config = IdentifierCaption()
     config.default_id = "custom-{identifier}-{index}"
     html = div(DEFAULT_TABLE_CAPTION, DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert 'id="custom-table-1"' in result
 
     config.default_id = "test-{index}"
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert 'id="test-1"' in result
 
 
-def test_postprocess_custom_caption_prefix():
+def test_postprocess_custom_caption_prefix(dummy_page):
     config = IdentifierCaption()
     config.caption_prefix = "custom {identifier} {index}:"
     html = div(DEFAULT_TABLE_CAPTION, DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert (
         '<caption style="caption-side:bottom">custom table 1: My Caption</caption>'
@@ -317,41 +396,61 @@ def test_postprocess_custom_caption_prefix():
     )
 
 
-def test_postprocess_default_reference():
+def test_postprocess_default_reference(dummy_page):
     config = IdentifierCaption()
     reference_element = '<a href="#_table-1"></a>'
     html = div(DEFAULT_TABLE_CAPTION, DEFAULT_TABLE, div(reference_element))
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
-    result = etree.tostring(tree, encoding="unicode", method="html")
-    assert '<a href="#_table-1">Table 1</a>' in result
+    post_processor = PostProcessor()
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=post_processor,
+    )
+
+    assert "test/#_table-1" in post_processor.regex_to_apply
 
 
-def test_postprocess_ignore_reference_with_text():
+def test_postprocess_ignore_reference_with_text(dummy_page):
     config = IdentifierCaption()
     reference_element = '<a href="#_table-1">Test</a>'
     html = div(DEFAULT_TABLE_CAPTION, DEFAULT_TABLE, div(reference_element))
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert '<a href="#_table-1">Test</a>' in result
 
 
-def test_postprocess_custom_reference():
+def test_postprocess_custom_reference(dummy_page):
     config = IdentifierCaption()
     config.reference_text = "custom {identifier} {index}"
     reference_element = '<a href="#_table-1"></a>'
     html = div(DEFAULT_TABLE_CAPTION, DEFAULT_TABLE, div(reference_element))
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
-    result = etree.tostring(tree, encoding="unicode", method="html")
-    assert '<a href="#_table-1">custom table 1</a>' in result
+    post_processor = PostProcessor()
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=post_processor,
+    )
+
+    assert "test/#_table-1" in post_processor.regex_to_apply
 
 
-def test_colgroups():
+def test_colgroups(dummy_page):
     config = IdentifierCaption()
     caption = (
         '<p><table-caption identifier="Table" cols="1,3"></p>'
@@ -360,7 +459,13 @@ def test_colgroups():
     html = div(caption, DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert (
         '<colgroup><col span="1" width="25.0%"><col span="1" width="75.0%"></colgroup>'
@@ -368,7 +473,7 @@ def test_colgroups():
     )
 
 
-def test_colgroups_alsways_100_percent():
+def test_colgroups_alsways_100_percent(dummy_page):
     config = IdentifierCaption()
     caption = (
         '<p><table-caption identifier="Table" cols="456,85"></p>'
@@ -377,7 +482,13 @@ def test_colgroups_alsways_100_percent():
     html = div(caption, DEFAULT_TABLE)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    table.postprocess_html(tree=tree, config=config, logger=None)
+    table.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert (
         '<colgroup><col span="1" width="84.28835489833642%">'
@@ -385,20 +496,26 @@ def test_colgroups_alsways_100_percent():
     ) in result
 
 
-def test_table_caption_without_table(caplog):
+def test_table_caption_without_table(caplog, dummy_page):
     config = IdentifierCaption()
     html = div(DEFAULT_TABLE_CAPTION, a("I am a table"))
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
     logger = get_logger("test.md")
     with caplog.at_level("ERROR"):
-        table.postprocess_html(tree=tree, config=config, logger=logger)
+        table.postprocess_html(
+            tree=tree,
+            config=config,
+            logger=logger,
+            page=dummy_page,
+            post_processor=PostProcessor(),
+        )
     assert "ERROR" in caplog.text
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert "<a>I am a table</a>" in result
 
 
-def test_table_caption_with_xml(caplog):
+def test_table_caption_with_xml(caplog, dummy_page):
     config = IdentifierCaption()
     config.caption_prefix = "<not nice> {index}:"
 
@@ -407,7 +524,13 @@ def test_table_caption_with_xml(caplog):
     tree = etree.fromstring(html, parser)
     logger = get_logger("test.md")
     with caplog.at_level("ERROR"):
-        table.postprocess_html(tree=tree, config=config, logger=logger)
+        table.postprocess_html(
+            tree=tree,
+            config=config,
+            logger=logger,
+            page=dummy_page,
+            post_processor=PostProcessor(),
+        )
     assert "ERROR" in caplog.text
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them

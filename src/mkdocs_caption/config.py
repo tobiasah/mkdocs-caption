@@ -124,6 +124,7 @@ class CaptionConfig(base.Config):
     Args:
         additional_identifier: The additional identifiers to use.
             (e.g. ["List"])
+        cross_reference_text: The text to use for cross-references.
         table: The configuration options for tables.
         figure: The configuration options for figures.
         custom: The configuration options for custom elements.
@@ -133,6 +134,7 @@ class CaptionConfig(base.Config):
         config_options.Type(str),
         default=[],
     )
+    cross_reference_text = config_options.Type(str, default="{page_title}/{local_ref}")
     table = config_options.SubConfig(IdentifierCaption)
     figure = config_options.SubConfig(FigureCaption)
     custom = config_options.SubConfig(IdentifierCaption)

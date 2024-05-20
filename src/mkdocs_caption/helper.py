@@ -11,23 +11,6 @@ from lxml import etree
 TreeElement = etree._Element  # noqa: SLF001
 
 
-def update_references(root: TreeElement, custom_id: str, text: str) -> None:
-    """Update references to a custom caption in an XML tree.
-
-    This function takes an XML tree, a custom caption identifier, and a new
-    caption text, and updates all references to the custom caption in the tree
-    to use the new caption text.
-
-    Args:
-        root: The root element of the XML tree.
-        custom_id: The identifier of the custom caption to update.
-        text: The new caption text to use.
-    """
-    for ref in root.xpath(f"//a[@href='#{custom_id}']"):
-        if not ref.text:
-            ref.text = text
-
-
 def _parse_extended_markdown(options: str | None) -> str:
     """Parse special extended markdown syntax.
 

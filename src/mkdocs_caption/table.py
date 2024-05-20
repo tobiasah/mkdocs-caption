@@ -10,13 +10,15 @@ from mkdocs_caption.helper import (
     CaptionInfo,
     TreeElement,
     iter_caption_elements,
-    update_references,
     wrap_md_captions,
 )
 
 if TYPE_CHECKING:
+    from mkdocs.structure.pages import Page
+
     from mkdocs_caption.config import IdentifierCaption
     from mkdocs_caption.logger import PluginLogger
+    from mkdocs_caption.post_processor import PostProcessor
 
 TABLE_CAPTION_TAG = "table-caption"
 
@@ -70,11 +72,10 @@ def _create_colgroups(coldef: str) -> TreeElement:
 def _add_caption_to_table(
     caption_info: CaptionInfo,
     *,
-    tree: TreeElement,
     index: int,
     config: IdentifierCaption,
     logger: PluginLogger,
-) -> None:
+) -> str | None:
     """Add a caption to a table element in an XML tree.
 
     This function takes an XML tree, a table element, a caption element, and an
@@ -103,7 +104,7 @@ def _add_caption_to_table(
             caption_prefix,
             caption_info.caption,
         )
-        return
+        return None
     caption_info.target_element.insert(0, table_caption_element)
 
     if "cols" in caption_info.attributes:
@@ -118,17 +119,15 @@ def _add_caption_to_table(
         config.get_default_id(index=index, identifier="table"),
     )
     caption_info.target_element.attrib["id"] = table_id
-    update_references(
-        tree,
-        table_id,
-        config.get_reference_text(index=index, identifier="table"),
-    )
+    return table_id
 
 
 def postprocess_html(
     *,
     tree: TreeElement,
     config: IdentifierCaption,
+    page: Page,
+    post_processor: PostProcessor,
     logger: PluginLogger,
 ) -> None:
     """Handle custom captions in an XML tree.
@@ -139,6 +138,8 @@ def postprocess_html(
     Args:
         tree: The root element of the XML tree.
         config: The plugin configuration.
+        page: The current page.
+        post_processor: The post processor to register targets.
         logger: Current plugin logger.
     """
     if not config.enable:
@@ -151,11 +152,17 @@ def postprocess_html(
                 caption_info.caption,
             )
             continue
-        _add_caption_to_table(
+        table_id = _add_caption_to_table(
             caption_info=caption_info,
-            tree=tree,
             index=index,
             config=config,
             logger=logger,
+        )
+        if table_id is None:
+            continue
+        post_processor.register_target(
+            table_id,
+            config.get_reference_text(index=index, identifier="table"),
+            page,
         )
         index += config.increment_index
