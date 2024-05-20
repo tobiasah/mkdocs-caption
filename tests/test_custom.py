@@ -5,6 +5,7 @@ from lxml import etree
 from mkdocs_caption import custom
 from mkdocs_caption.config import IdentifierCaption
 from mkdocs_caption.logger import get_logger
+from mkdocs_caption.post_processor import PostProcessor
 
 
 def test_preprocess_disabled():
@@ -177,35 +178,53 @@ DEFAULT_CAPTION = (
 )
 
 
-def test_postprocess_disabled():
+def test_postprocess_disabled(dummy_page):
     config = IdentifierCaption()
     config.enable = False
     html = p(DEFAULT_CAPTION, DEFAULT_INNER)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     assert DEFAULT_INNER in result
 
 
-def test_postprocess_no_identifier():
+def test_postprocess_no_identifier(dummy_page):
     config = IdentifierCaption()
     html = p(a("caption"), DEFAULT_INNER)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
     assert result == html
 
 
-def test_postprocess_default_identifier():
+def test_postprocess_default_identifier(dummy_page):
     config = IdentifierCaption()
     html = p(DEFAULT_CAPTION, DEFAULT_INNER)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
@@ -213,7 +232,7 @@ def test_postprocess_default_identifier():
     assert "<figcaption>List 1: My Caption</figcaption>" in result
 
 
-def test_postprocess_multiple():
+def test_postprocess_multiple(dummy_page):
     config = IdentifierCaption()
     caption1 = (
         '<p><custom-caption identifier="List"></p><p>First</p>'
@@ -230,7 +249,13 @@ def test_postprocess_multiple():
     )
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
@@ -238,7 +263,7 @@ def test_postprocess_multiple():
     assert "<figcaption>List 2: Second</figcaption>" in result
 
 
-def test_postprocess_multiple_nested():
+def test_postprocess_multiple_nested(dummy_page):
     config = IdentifierCaption()
     caption1 = (
         '<p><custom-caption identifier="List"></p><p>First</p>'
@@ -255,7 +280,13 @@ def test_postprocess_multiple_nested():
     )
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
@@ -263,20 +294,26 @@ def test_postprocess_multiple_nested():
     assert "<figcaption>List 2: Second</figcaption>" in result
 
 
-def test_postprocess_custom_start_index():
+def test_postprocess_custom_start_index(dummy_page):
     config = IdentifierCaption()
     config.start_index = 10
     html = p(DEFAULT_CAPTION, DEFAULT_INNER)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
     assert "<figcaption>List 10: My Caption</figcaption>" in result
 
 
-def test_postprocess_custom_increment():
+def test_postprocess_custom_increment(dummy_page):
     config = IdentifierCaption()
     config.increment_index = 10
     caption1 = (
@@ -290,7 +327,13 @@ def test_postprocess_custom_increment():
     html = p(p(caption1, DEFAULT_INNER), p(caption2, DEFAULT_INNER))
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
@@ -298,13 +341,19 @@ def test_postprocess_custom_increment():
     assert "<figcaption>List 11: Second</figcaption>" in result
 
 
-def test_postprocess_position():
+def test_postprocess_position(dummy_page):
     config = IdentifierCaption()
     config.position = "top"
     html = p(DEFAULT_CAPTION, DEFAULT_INNER)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
@@ -313,32 +362,50 @@ def test_postprocess_position():
     config.position = "bottom"
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
     assert "</span><figcaption>" in result
 
 
-def test_postprocess_default_id():
+def test_postprocess_default_id(dummy_page):
     config = IdentifierCaption()
     html = p(DEFAULT_CAPTION, DEFAULT_INNER)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
     assert 'id="_list-1"' in result
 
 
-def test_postprocess_custom_id():
+def test_postprocess_custom_id(dummy_page):
     config = IdentifierCaption()
     config.default_id = "custom-{identifier}-{index}"
     html = p(DEFAULT_CAPTION, DEFAULT_INNER)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
@@ -347,74 +414,108 @@ def test_postprocess_custom_id():
     config.default_id = "test-{index}"
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
     assert 'id="test-1"' in result
 
 
-def test_postprocess_custom_caption_prefix():
+def test_postprocess_custom_caption_prefix(dummy_page):
     config = IdentifierCaption()
     config.caption_prefix = "custom {identifier} {index}:"
     html = p(DEFAULT_CAPTION, DEFAULT_INNER)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
     # HTMLParser adds <html><body> tags, remove them
     result = result[len("<html><body>") : -len("</body></html>")]
     assert "<figcaption>custom list 1: My Caption</figcaption>" in result
 
 
-def test_postprocess_default_reference():
+def test_postprocess_default_reference(dummy_page):
     config = IdentifierCaption()
     reference_element = '<a href="#_list-1"></a>'
     html = p(DEFAULT_CAPTION, DEFAULT_INNER, p(reference_element))
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
-    result = etree.tostring(tree, encoding="unicode", method="html")
-    # HTMLParser adds <html><body> tags, remove them
-    result = result[len("<html><body>") : -len("</body></html>")]
-    assert '<a href="#_list-1">List 1</a>' in result
+    post_processor = PostProcessor()
+    page = dummy_page
+    page.file.src_path = "test.md"
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=page,
+        post_processor=post_processor,
+    )
+    assert "test/#_list-1" in post_processor.regex_to_apply
 
 
-def test_postprocess_ignore_reference_with_text():
+def test_postprocess_ignore_reference_with_text(dummy_page):
     config = IdentifierCaption()
     reference_element = '<a href="#_list-1">Test</a>'
     html = p(DEFAULT_CAPTION, DEFAULT_INNER, p(reference_element))
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
     result = etree.tostring(tree, encoding="unicode", method="html")
-    # HTMLParser adds <html><body> tags, remove them
-    result = result[len("<html><body>") : -len("</body></html>")]
     assert '<a href="#_list-1">Test</a>' in result
 
 
-def test_postprocess_custom_reference():
+def test_postprocess_custom_reference(dummy_page):
     config = IdentifierCaption()
     config.reference_text = "custom {identifier} {index}"
     reference_element = '<a href="#_list-1"></a>'
     html = p(DEFAULT_CAPTION, DEFAULT_INNER, p(reference_element))
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
-    custom.postprocess_html(tree=tree, config=config, logger=None)
-    result = etree.tostring(tree, encoding="unicode", method="html")
-    # htmlparser adds <html><body> tags, remove them
-    result = result[len("<html><body>") : -len("</body></html>")]
-    assert '<a href="#_list-1">custom list 1</a>' in result
+    post_processor = PostProcessor()
+    page = dummy_page
+    page.file.src_path = "test.md"
+    custom.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=None,
+        page=page,
+        post_processor=post_processor,
+    )
+    assert "test/#_list-1" in post_processor.regex_to_apply
 
 
-def test_custom_caption_no_target(caplog):
+def test_custom_caption_no_target(caplog, dummy_page):
     config = IdentifierCaption()
     html = p(DEFAULT_CAPTION)
     parser = etree.HTMLParser()
     tree = etree.fromstring(html, parser)
     logger = get_logger("test.md")
     with caplog.at_level("ERROR"):
-        custom.postprocess_html(tree=tree, config=config, logger=logger)
+        custom.postprocess_html(
+            tree=tree,
+            config=config,
+            logger=logger,
+            page=dummy_page,
+            post_processor=PostProcessor(),
+        )
     assert "ERROR" in caplog.text
     result = etree.tostring(tree, encoding="unicode", method="html")
     # htmlparser adds <html><body> tags, remove them
@@ -422,7 +523,7 @@ def test_custom_caption_no_target(caplog):
     assert result == "<p></p>"
 
 
-def test_custom_caption_with_xml(caplog):
+def test_custom_caption_with_xml(caplog, dummy_page):
     config = IdentifierCaption()
     config.caption_prefix = "<not nice> {index}:"
     html = p(DEFAULT_CAPTION, DEFAULT_INNER)
@@ -431,7 +532,13 @@ def test_custom_caption_with_xml(caplog):
     tree = etree.fromstring(html, parser)
     logger = get_logger("test.md")
     with caplog.at_level("ERROR"):
-        custom.postprocess_html(tree=tree, config=config, logger=logger)
+        custom.postprocess_html(
+            tree=tree,
+            config=config,
+            logger=logger,
+            page=dummy_page,
+            post_processor=PostProcessor(),
+        )
     assert "ERROR" in caplog.text
     result = etree.tostring(tree, encoding="unicode", method="html")
     # htmlparser adds <html><body> tags, remove them

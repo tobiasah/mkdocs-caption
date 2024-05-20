@@ -82,8 +82,8 @@ dependencies = [
 ]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src/mkdocs_caption}"
-style = ["ruff {args:.}", "black --check --diff {args:.}"]
-fmt = ["black {args:.}", "ruff --fix {args:.}", "style"]
+style = ["ruff check {args:.}", "black --check --diff {args:.}"]
+fmt = ["black {args:.}", "ruff check --fix {args:.}", "style"]
 all = ["style", "typing"]
 
 [tool.hatch.envs.doc]
@@ -106,8 +106,8 @@ target-version = ["py38"]
 
 [tool.ruff]
 target-version = "py38"
-select = ["ALL"]
-ignore = [
+lint.select = ["ALL"]
+lint.ignore = [
   # Using `xml` to parse untrusted data
   "S320",
   # Too many arguments to function call
@@ -122,16 +122,16 @@ ignore = [
   "ANN003",
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["mkdocs_caption"]
 
-[tool.ruff.flake8-tidy-imports]
+[tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = [
   "PLR2004",

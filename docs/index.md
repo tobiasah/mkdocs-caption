@@ -16,6 +16,7 @@ enable the plugin and you are good to go.
 * Dynamic link text generation for references
 * Highly configurable
 * Extendable to support captions for all element types
+* Cross page referencing
 
 ## Installation
 

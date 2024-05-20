@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.2.0
+
+* Allow automatic link text generation across different pages.
+
 ## Version 1.1.0
 
 * Allow markdown syntax within the caption element.

@@ -17,3 +17,7 @@ plugins:
     additional_identifier: ["List", "Code"]
     custom:
       enable: true
+
+nav:
+  - Home: 'index.md'
+  - Second: 'second_page.md'

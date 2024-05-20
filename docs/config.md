@@ -9,6 +9,7 @@ The default configuration is as follows:
 plugins:
   - caption:
     additional_identifier: []  # (1)!
+    cross_reference_text: '{page_title}/{local_ref}'
     table: # (2)!
       enable: true
       start_index: 1
