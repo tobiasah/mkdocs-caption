@@ -411,7 +411,7 @@ def test_postprocess_default_reference(dummy_page):
         post_processor=post_processor,
     )
 
-    assert "test/#_table-1" in post_processor.regex_to_apply
+    assert 'test/#_table-1"' in post_processor.regex_to_apply
 
 
 def test_postprocess_ignore_reference_with_text(dummy_page):
@@ -447,7 +447,7 @@ def test_postprocess_custom_reference(dummy_page):
         post_processor=post_processor,
     )
 
-    assert "test/#_table-1" in post_processor.regex_to_apply
+    assert 'test/#_table-1"' in post_processor.regex_to_apply
 
 
 def test_colgroups(dummy_page):

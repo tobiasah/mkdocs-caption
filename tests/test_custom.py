@@ -462,7 +462,7 @@ def test_postprocess_default_reference(dummy_page):
         page=page,
         post_processor=post_processor,
     )
-    assert "test/#_list-1" in post_processor.regex_to_apply
+    assert 'test/#_list-1"' in post_processor.regex_to_apply
 
 
 def test_postprocess_ignore_reference_with_text(dummy_page):
@@ -499,7 +499,7 @@ def test_postprocess_custom_reference(dummy_page):
         page=page,
         post_processor=post_processor,
     )
-    assert "test/#_list-1" in post_processor.regex_to_apply
+    assert 'test/#_list-1"' in post_processor.regex_to_apply
 
 
 def test_custom_caption_no_target(caplog, dummy_page):
