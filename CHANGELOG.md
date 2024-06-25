@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.2.1
+
+* Fix bug in the post processing which cause references with ids which contain other ids
+  to be replaced with the wrong text.
+
 ## Version 1.2.0
 
 * Allow automatic link text generation across different pages.

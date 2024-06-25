@@ -36,9 +36,9 @@ class PostProcessor:
             "{page_title}",
             page.title,
         ).replace("{local_ref}", text)
-        self._regex_to_apply[rf"{page.file.src_path[:-3]}/#{identifier}"] = (
+        self._regex_to_apply[rf'{page.file.src_path[:-3]}/#{identifier}"'] = (
             re.compile(
-                rf"({page.file.src_path[:-3]}/#{identifier}.*?>)(</a>)",
+                rf'({page.file.src_path[:-3]}/#{identifier}".*?>)(</a>)',
                 flags=re.MULTILINE | re.DOTALL,
             ),
             rf"\1{target_text}\2",
@@ -48,7 +48,7 @@ class PostProcessor:
         self._local_regex[page.file.src_uri].append(
             (
                 re.compile(
-                    rf"(\"#{identifier}.*?>)(</a>)",
+                    rf'("#{identifier}".*?>)(</a>)',
                     flags=re.MULTILINE | re.DOTALL,
                 ),
                 rf"\1{text}\2",
