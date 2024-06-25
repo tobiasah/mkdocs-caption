@@ -6,7 +6,7 @@ from mkdocs_caption.post_processor import PostProcessor
 def test_post_processor_register(dummy_page):
     post_processor = PostProcessor()
     post_processor.register_target("identifier", "text", dummy_page)
-    assert "test/#identifier" in post_processor.regex_to_apply
+    assert 'test/#identifier"' in post_processor.regex_to_apply
     assert dummy_page.file.src_uri in post_processor._local_regex  # noqa: SLF001
 
 
@@ -48,4 +48,14 @@ def test_post_processor_replace_existing_text(dummy_page):
     assert (
         post_processor.post_process(dummy_page, content)
         == '<a href="test/#identifier">hello</a>'
+    )
+
+
+def test_post_processor_similar_tag(dummy_page):
+    post_processor = PostProcessor()
+    post_processor.register_target("test", "wrong", dummy_page)
+    post_processor.register_target("test2", "right", dummy_page)
+    content = '<a href="#test2"></a>'
+    assert (
+        post_processor.post_process(dummy_page, content) == '<a href="#test2">right</a>'
     )
