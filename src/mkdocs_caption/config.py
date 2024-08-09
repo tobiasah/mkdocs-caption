@@ -116,6 +116,7 @@ class FigureCaption(IdentifierCaption):
         config_options.Type(str),
         default=["twemoji"],
     )
+    ignore_hash = config_options.Type(bool, default=False)
 
 
 class CaptionConfig(base.Config):
