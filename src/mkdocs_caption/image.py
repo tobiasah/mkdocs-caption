@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import urllib.parse
+from typing import TYPE_CHECKING, Iterator
 
 from lxml import etree
 
@@ -52,6 +53,7 @@ def wrap_image(
     caption: TreeElement,
     position: str,
     figure_attrib: dict[str, str],
+    siblings: list[TreeElement],
 ) -> None:
     """Wrap an image element in a figure element with a custom caption.
 
@@ -64,6 +66,8 @@ def wrap_image(
         caption: The caption element to use.
         position: The position of the caption relative to the image. (top, bottom)
         figure_attrib: Additional attributes for the figure element.
+        siblings: Images that belong to the image and should be wrapped in the
+            same figure.
     """
     target = img
     parent = img.getparent()
@@ -75,8 +79,12 @@ def wrap_image(
     if position == "top":
         figure_element.append(caption)
         figure_element.append(target)
+        for sibling in siblings:
+            figure_element.append(sibling)
     else:
         figure_element.append(target)
+        for sibling in siblings:
+            figure_element.append(sibling)
         figure_element.append(caption)
 
 
@@ -90,6 +98,7 @@ def postprocess_image(
     figure_attrib: dict[str, str] | None,
     page: Page,
     post_processor: PostProcessor,
+    siblings: list[TreeElement],
 ) -> None:
     """Postprocess an image element to handle custom image captions.
 
@@ -106,6 +115,8 @@ def postprocess_image(
         figure_attrib: Additional attributes for the figure element.
         page: The current page.
         post_processor: The post processor to register targets.
+        siblings: Images that belong to the image and should be wrapped in the
+            same figure.
     """
     # Its a bit of a tricky situation here. The user can specify a custom id
     # both on the figure element and the image element. The references to both
@@ -143,7 +154,58 @@ def postprocess_image(
         caption=caption_element,
         position=config.position,
         figure_attrib=figure_attrib,
+        siblings=siblings,
     )
+
+
+def _has_url_fragment(img_element: TreeElement) -> bool:
+    """Check if a URL has a hash fragment.
+
+    Args:
+        img_element: The image element to check.
+
+    Returns:
+        True if the URL has a hash fragment, False otherwise.
+    """
+    return urllib.parse.urlparse(img_element.get("src")).fragment is not None
+
+
+def _get_siblings(
+    img_element: TreeElement,
+    config: FigureCaption,
+    img_iter: Iterator[TreeElement],
+) -> list[TreeElement]:
+    """Get potential siblings of an image element.
+
+    A sibling is an image element that directly follows the current image element.
+    This makes only sense if the image element has a URL with a hash fragment.
+
+    This allows two have separate images for e.g light and dark mode:
+
+    https://squidfunk.github.io/mkdocs-material/reference/images/#light-and-dark-mode
+
+    Args:
+        img_element: The image element to check.
+        config: The plugin configuration.
+        img_iter: An iterator over the image elements.
+
+    Returns:
+        A list of sibling image elements
+    """
+    siblings = []
+    next_element = img_element.getnext()
+    if (
+        not config.ignore_hash
+        and _has_url_fragment(img_element)
+        and next_element is not None
+        and next_element.tag == "img"
+        and _has_url_fragment(next_element)
+    ):
+        next_element.attrib.pop("title", None)
+        siblings.append(next_element)
+        next(img_iter)
+        siblings = [*siblings, *_get_siblings(next_element, config, img_iter)]
+    return siblings
 
 
 def postprocess_html(
@@ -191,16 +253,23 @@ def postprocess_html(
 
     # Iterate through all images and wrap them in a figure element if requested
     index = config.start_index
-    for img_element in tree.xpath("//p/a/img|//p/img"):
+    img_elements = tree.xpath("//p/a/img|//p/img")
+    img_iter = iter(img_elements)
+    for img_element in img_iter:
         figure_attrib = custom_figure_attrib.get(img_element, {})
-        if img_element.attrib.get("class", None) in config.ignore_classes:
+        if img_element.attrib.get("class") in config.ignore_classes:
             continue
+        siblings = _get_siblings(img_element, config=config, img_iter=img_iter)
         # We pop the title here so its not duplicated in the img element
         title = img_element.attrib.pop("title", None)
         if title is None:
             # Use the alt text if provided
             title = img_element.get("alt", None)
-            if config.ignore_alt or not title or img_element.tail is not None:
+            if (
+                config.ignore_alt
+                or not title
+                or (img_element.tail is not None and len(siblings) == 0)
+            ):
                 continue
         postprocess_image(
             img_element=img_element,
@@ -211,5 +280,6 @@ def postprocess_html(
             figure_attrib=figure_attrib,
             page=page,
             post_processor=post_processor,
+            siblings=siblings,
         )
         index += config.increment_index

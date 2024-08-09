@@ -32,6 +32,7 @@ plugins:
       allow_indented_caption: True
       ignore_alt: False
       ignore_classes: ["twemoji"]
+      ignore_hash: False
     custom: # (4)!
       enable: true
       start_index: 1
@@ -78,6 +79,7 @@ The following table lists all available options.
 | ignore_alt | Flag if the alt attribute should be ignored. This will disable the feature that 
 uses the alt text as a caption. (Only available for figures) |
 | ignore_classes | List of classes ignored when adding the captions. (Only available for figures) |
+| ignore_hash | Flag is there is not special parsing of hashes in the image url. This disables the support for packing images into the same figure (e.g light and dark mode) |
 
 ## Overwriting the default configuration
 

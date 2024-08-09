@@ -1,9 +1,11 @@
 # Changelog
 
-## Version 1.2.1
+## Version 1.3.0
 
 * Fix bug in the post processing which cause references with ids which contain other ids
   to be replaced with the wrong text.
+* Adapt figure generation to allow packing multiple images into the same figure.
+  This is necessary to e.g allow having different images for light and dark mode.
 
 ## Version 1.2.0
 
