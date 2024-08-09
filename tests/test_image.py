@@ -688,3 +688,109 @@ def test_figure_caption_ignores_marked_classes(dummy_page):
     result = result[len("<html><body>") : -len("</body></html>")]
     result = result[len("<p>") : -len("</p>")]
     assert result == img
+
+
+def test_figure_caption_single_sibling(dummy_page):
+    config = FigureCaption()
+    img = '<img  src="test.png#light-only" title="=text" id="test_id">'
+    sibling = '<img src="test_dark.png#dark-only" title="=text" id="test_id">'
+    html = p(img, sibling)
+    parser = etree.HTMLParser()
+    tree = etree.fromstring(html, parser)
+    logger = get_logger("test.md")
+    image.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=logger,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
+    assert len(tree.xpath("//figure")) == 1
+    result_figure = tree.xpath("//figure")[0]
+    result_imgs = list(result_figure.iterchildren())
+    assert len(result_imgs) == 3
+    assert result_imgs[0].get("src") == "test.png#light-only"
+    assert result_imgs[1].get("src") == "test_dark.png#dark-only"
+    assert result_imgs[2].tag == "figcaption"
+
+
+def test_figure_caption_single_sibling_caption_top(dummy_page):
+    config = FigureCaption()
+    img = '<img  src="test.png#light-only" title="=text" id="test_id">'
+    sibling = '<img src="test_dark.png#dark-only" title="=text" id="test_id">'
+    html = p(img, sibling)
+    parser = etree.HTMLParser()
+    tree = etree.fromstring(html, parser)
+    config.position = "top"
+    logger = get_logger("test.md")
+    image.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=logger,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
+    assert len(tree.xpath("//figure")) == 1
+    result_figure = tree.xpath("//figure")[0]
+    result_imgs = list(result_figure.iterchildren())
+    assert len(result_imgs) == 3
+    assert result_imgs[0].tag == "figcaption"
+    assert result_imgs[1].get("src") == "test.png#light-only"
+    assert result_imgs[2].get("src") == "test_dark.png#dark-only"
+
+
+def test_figure_caption_multiple_sibling(dummy_page):
+    config = FigureCaption()
+    img = '<img  src="test.png#light-only" title="=text" id="test_id">'
+    sibling1 = '<img src="test_dark.png#dark-only" title="=text" id="test_id">'
+    sibling2 = '<img src="test_blue.png#blue-only" title="=text" id="test_id">'
+    html = p(img, sibling1, sibling2)
+    parser = etree.HTMLParser()
+    tree = etree.fromstring(html, parser)
+    logger = get_logger("test.md")
+    image.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=logger,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
+    assert len(tree.xpath("//figure")) == 1
+    result_figure = tree.xpath("//figure")[0]
+    result_imgs = list(result_figure.iterchildren())
+    assert len(result_imgs) == 4
+    assert result_imgs[0].get("src") == "test.png#light-only"
+    assert result_imgs[1].get("src") == "test_dark.png#dark-only"
+    assert result_imgs[2].get("src") == "test_blue.png#blue-only"
+    assert result_imgs[3].tag == "figcaption"
+
+
+def test_figure_caption_ignore_siblings(dummy_page):
+    config = FigureCaption()
+    config.ignore_hash = True
+    img = '<img  src="test.png#light-only" title="=text" id="test_id">'
+    sibling = '<img src="test_dark.png#dark-only" title="=text" id="test_id">'
+    html = p(img, sibling)
+    parser = etree.HTMLParser()
+    tree = etree.fromstring(html, parser)
+    logger = get_logger("test.md")
+    image.postprocess_html(
+        tree=tree,
+        config=config,
+        logger=logger,
+        page=dummy_page,
+        post_processor=PostProcessor(),
+    )
+    assert len(tree.xpath("//figure")) == 2
+
+    result_figure = tree.xpath("//figure")[0]
+    result_imgs = list(result_figure.iterchildren())
+    assert len(result_imgs) == 2
+    assert result_imgs[0].get("src") == "test.png#light-only"
+    assert result_imgs[1].tag == "figcaption"
+
+    result_figure = tree.xpath("//figure")[1]
+    result_imgs = list(result_figure.iterchildren())
+    assert len(result_imgs) == 2
+    assert result_imgs[0].get("src") == "test_dark.png#dark-only"
+    assert result_imgs[1].tag == "figcaption"

@@ -2,6 +2,9 @@
 
 For full documentation, visit [https://tobiasah.github.io/mkdocs-caption/](https://tobiasah.github.io/mkdocs-caption/).
 
+![Image title](https://dummyimage.com/600x400/f5f5f5/aaaaaa#only-light){width=80% #fig-schematic}
+![Image title](https://dummyimage.com/600x400/21222c/d5d7e2#only-dark){width=80% #fig-schematic}
+
 ## Images
 
 ![This uses the alt as caption](assets/demo.png){width="200"}
