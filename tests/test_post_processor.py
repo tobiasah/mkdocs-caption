@@ -27,7 +27,7 @@ def test_post_processor_replace_multiple(dummy_page):
     content = '<a href="test.html#identifier"></a>...<a href="test.html#dummy"></a>'
     assert (
         post_processor.post_process(dummy_page, content)
-        == '<a href="test.html#identifier">text</a>...<a href="test.html#dummy">dummy</a>'
+        == '<a href="test.html#identifier">text</a>...<a href="test.html#dummy">dummy</a>'  # noqa: E501
     )
 
 

@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import re
+import typing as t
 from dataclasses import dataclass
-from typing import Iterator
 
 from lxml import etree
+
+if t.TYPE_CHECKING:
+    from collections.abc import Iterator
 
 TreeElement = etree._Element  # noqa: SLF001
 
