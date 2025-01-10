@@ -6,6 +6,9 @@
   to be replaced with the wrong text.
 * Adapt figure generation to allow packing multiple images into the same figure.
   This is necessary to e.g allow having different images for light and dark mode.
+* Fix bug in the post processing which causes the windows build to fail.
+* Fix bug in the post processing which causes incorrect substitutions when a
+  reference to a target is placed before the target.
 
 ## Version 1.2.0
 

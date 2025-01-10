@@ -520,7 +520,7 @@ def test_postprocess_default_reference(dummy_page):
         page=dummy_page,
         post_processor=post_processor,
     )
-    assert 'test/#_figure-1"' in post_processor.regex_to_apply
+    assert 'test.html#_figure-1"' in post_processor.regex_to_apply
 
 
 def test_postprocess_ignore_reference_with_text(dummy_page):
@@ -557,7 +557,7 @@ def test_postprocess_custom_reference(dummy_page):
         page=dummy_page,
         post_processor=post_processor,
     )
-    assert 'test/#_figure-1"' in post_processor.regex_to_apply
+    assert 'test.html#_figure-1"' in post_processor.regex_to_apply
 
 
 def test_figure_caption_with_no_img(caplog, dummy_page):
