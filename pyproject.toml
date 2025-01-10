@@ -23,6 +23,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
@@ -52,7 +53,7 @@ packages = ["src/mkdocs_caption"]
 dependencies = ["coverage[toml]>=6.5", "pytest", "lxml"]
 
 [[tool.hatch.envs.test.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11"]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
 [tool.hatch.envs.test]
 dependencies = [
@@ -69,7 +70,7 @@ cov-report = ["- coverage combine", "coverage report", "coverage html"]
 cov = ["test-cov", "cov-report"]
 
 [[tool.hatch.envs.lint.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11"]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
 [tool.hatch.envs.lint]
 detached = true
@@ -102,10 +103,10 @@ serve = "mkdocs serve"
 deploy = "mkdocs gh-deploy"
 
 [tool.black]
-target-version = ["py38"]
+target-version = ["py39"]
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 lint.select = ["ALL"]
 lint.ignore = [
   # Using `xml` to parse untrusted data
@@ -116,8 +117,6 @@ lint.ignore = [
   "TRY400",
   # Missing docstring in `__init__`
   "D107",
-  # Missing type annotation for `self` in method
-  "ANN101",
   # Missing type annotation for `**kwargs`
   "ANN003",
 ]

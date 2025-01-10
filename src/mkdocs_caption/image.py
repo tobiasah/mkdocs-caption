@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import urllib.parse
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 from lxml import etree
 
@@ -14,6 +14,8 @@ from mkdocs_caption.helper import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from mkdocs.structure.pages import Page
 
     from mkdocs_caption.config import FigureCaption

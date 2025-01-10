@@ -5,7 +5,7 @@ from mkdocs.structure.files import File
 from mkdocs.structure.pages import Page
 
 
-@pytest.fixture()
+@pytest.fixture
 def dummy_page():
     return Page(
         title="Test",
